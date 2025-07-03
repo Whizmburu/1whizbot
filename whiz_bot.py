@@ -18,7 +18,9 @@ from commands.about import get_about_info as about_command_handler
 from commands.help import get_help_message as help_command_handler
 from commands.support import get_support_info as support_command_handler
 from commands.prefix import get_prefix_info as prefix_command_handler
-from commands.setprefix import update_prefix_list as setprefix_command_handler # Added setprefix
+from commands.setprefix import update_prefix_list as setprefix_command_handler
+from commands.report import get_report_message as report_command_handler
+from commands.invite import get_invite_message as invite_command_handler # Added invite
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -82,6 +84,10 @@ def process_command(command_text):
         if new_list is not None: # Check if update was successful
             ACTIVE_PREFIXES = new_list # Assignment to global
         print(message) # Print success or error message from handler
+    elif command_text.lower() == "/report":
+        print(report_command_handler())
+    elif command_text.lower() == "/invite":
+        print(invite_command_handler())
     else:
         print(f"Unknown command: {command_text}")
 

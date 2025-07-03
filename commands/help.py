@@ -11,6 +11,8 @@ COMMANDS_LIST = {
     "/support": "Shows the link to the official support group.",
     "/prefix": "Displays the current command prefixes.",
     "/setprefix <prefixes>": "Sets new command prefixes (e.g., /setprefix ! $).",
+    "/report": "Shows instructions on how to report bugs or issues.",
+    "/invite": "Shows information on how to invite the bot or share it.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
