@@ -30,9 +30,11 @@ COMMANDS_LIST = {
     "/ship <name1> [name2]": "Calculates love compatibility between names.",
     "/guess <number>": "Guess a number (1-10). Bot tells you if you're right!",
     "/reverse <text>": "Reverses the provided text.",
-    "/fancy [style] <text>": "Converts text to fancy Unicode. Styles: bold_serif, script, fraktur.",
+    "/fancy [style] <text>": "Converts text to fancy Unicode. Styles: bold_serif, script, fraktur, cursive.",
     "/zalgo [intensity] <text>": "Converts text to Zalgo (glitch) text. Intensities: low, normal, high, max.",
     "/tinytext <text>": "Converts text to tiny Unicode (small caps).",
+    "/ascii [font] <text>": "Generates ASCII art from text. Fonts: standard, slant, big, etc.",
+    "/emoji <keyword>": "Finds emojis related to a keyword (e.g., /emoji happy).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

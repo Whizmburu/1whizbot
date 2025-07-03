@@ -40,7 +40,9 @@ from commands.fun_cmds import coin_flip as coinflip_command_handler, \
 from commands.text_utils_cmds import reverse_text as reverse_command_handler, \
                                      generate_fancy_text as fancy_command_handler, \
                                      generate_zalgo_text as zalgo_command_handler, \
-                                     generate_tiny_text as tinytext_command_handler # Added text_utils
+                                     generate_tiny_text as tinytext_command_handler, \
+                                     generate_ascii_art as ascii_command_handler, \
+                                     find_emojis_for_keyword as emoji_command_handler # Added text_utils
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -277,6 +279,46 @@ def process_command(command_text):
         if len(parts) > 1:
             text_to_tiny = parts[1]
         print(tinytext_command_handler(text_to_tiny))
+    elif command_text.lower().startswith("/ascii"):
+        parts = command_text.split(maxsplit=1) # /ascii args
+        args_str = None
+        if len(parts) > 1:
+            args_str = parts[1]
+
+        font_choice = "standard" # Default font
+        text_to_artify = None
+
+        if args_str:
+            arg_parts = args_str.strip().split(maxsplit=1)
+            # Check if first part is a font (simple check: one word, no spaces, reasonable length)
+            # A more robust check would be against pyfiglet.FigletFont.getFonts() or a curated list.
+            # For now, the handler `generate_ascii_art` will attempt to use it and catch FontNotFound.
+            if len(arg_parts) > 1 and len(arg_parts[0]) < 20 and not " " in arg_parts[0]: # Heuristic for font name
+                # Try to see if this font exists, if not, it's part of the text
+                # This check is tricky without querying all pyfiglet fonts.
+                # Let's assume if there are two parts, first is font, second is text.
+                # If one part, it's text. The handler will default font if it's not found.
+                # For simplicity in whiz_bot.py, we'll pass font if two args, else just text
+                # The generate_ascii_art function itself handles font="standard" default.
+
+                # Simplified parsing: if first word looks like a font name and there's more text.
+                # This is similar to /fancy and /zalgo parsing.
+                from commands.text_utils_cmds import AVAILABLE_FIGLET_FONTS # For checking
+                if arg_parts[0].lower() in AVAILABLE_FIGLET_FONTS and len(arg_parts) > 1:
+                    font_choice = arg_parts[0].lower()
+                    text_to_artify = arg_parts[1]
+                else: # First part is not a known font, or only one part given
+                    text_to_artify = args_str
+            else: # Only one "word" after /ascii, assume it's text
+                 text_to_artify = args_str
+
+        print(ascii_command_handler(text_to_artify, font_choice))
+    elif command_text.lower().startswith("/emoji"):
+        parts = command_text.split(maxsplit=1)
+        keyword = None
+        if len(parts) > 1:
+            keyword = parts[1]
+        print(emoji_command_handler(keyword))
     else:
         print(f"Unknown command: {command_text}")
 

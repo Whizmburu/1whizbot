@@ -35,6 +35,13 @@ FANCY_STYLES = {
         'N': '𝔑', 'O': '𝔒', 'P': '𝔓', 'Q': '𝔔', 'R': 'ℜ', 'S': '𝔖', 'T': '𝔗', 'U': '𝔘', 'V': '𝔙', 'W': '𝔚', 'X': '𝔛', 'Y': '𝔜', 'Z': 'ℨ',
         'a': '𝔞', 'b': '𝔟', 'c': '𝔠', 'd': '𝔡', 'e': '𝔢', 'f': '𝔣', 'g': '𝔤', 'h': '𝔥', 'i': '𝔦', 'j': '𝔧', 'k': '𝔨', 'l': '𝔩', 'm': '𝔪',
         'n': '𝔫', 'o': '𝔬', 'p': '𝔭', 'q': '𝔮', 'r': '𝔯', 's': '𝔰', 't': '𝔱', 'u': '𝔲', 'v': '𝔳', 'w': '𝔴', 'x': '𝔵', 'y': '𝔶', 'z': '𝔷',
+    },
+    "cursive": { # Mathematical Bold Script
+        'A': '𝓐', 'B': '𝓑', 'C': '𝓒', 'D': '𝓓', 'E': '𝓔', 'F': '𝓕', 'G': '𝓖', 'H': '𝓗', 'I': '𝓘', 'J': '𝓙', 'K': '𝓚', 'L': '𝓛', 'M': '𝓜',
+        'N': '𝓝', 'O': '𝓞', 'P': '𝓟', 'Q': '𝓠', 'R': '𝓡', 'S': '𝓢', 'T': '𝓣', 'U': '𝓤', 'V': '𝓥', 'W': '𝓦', 'X': '𝓧', 'Y': '𝓨', 'Z': '𝓩',
+        'a': '𝓪', 'b': '𝓫', 'c': '𝓬', 'd': '𝓭', 'e': '𝓮', 'f': '𝓯', 'g': '𝓰', 'h': '𝓱', 'i': '𝓲', 'j': '𝓳', 'k': '𝓴', 'l': '𝓵', 'm': '𝓶',
+        'n': '𝓷', 'o': '𝓸', 'p': '𝓹', 'q': '𝓺', 'r': '𝓻', 's': '𝓼', 't': '𝓽', 'u': '𝓾', 'v': '𝓿', 'w': '𝔀', 'x': '𝔁', 'y': '𝔂', 'z': '𝔃'
+        # Numbers are not typically available in this style
     }
     # Add more styles (e.g., monospace, double-struck) here as needed
 }
@@ -164,6 +171,106 @@ def generate_tiny_text(text_to_tiny: str) -> str:
 
     return f"🤏 Tiny Text: {tinified_text}"
 
+# --- ASCII Art Command ---
+try:
+    import pyfiglet
+    PYFIGLET_AVAILABLE = True
+    # Get a list of available fonts, suggest a few common/good ones
+    # figlet_fonts = pyfiglet.FigletFont.getFonts() # This can be a very long list
+    AVAILABLE_FIGLET_FONTS = ["standard", "slant", "big", "banner", "small", "graffiti", "starwars", "smslant"]
+except ImportError:
+    PYFIGLET_AVAILABLE = False
+    AVAILABLE_FIGLET_FONTS = []
+
+def generate_ascii_art(text_to_artify: str, font: str = "standard") -> str:
+    """
+    Generates ASCII art from text using pyfiglet.
+    """
+    if not PYFIGLET_AVAILABLE:
+        return "🚫 Error: The 'pyfiglet' library is not installed, so I can't create ASCII art."
+
+    if not text_to_artify or not text_to_artify.strip():
+        return "🎨 Please provide some text to turn into ASCII art! Usage: /ascii [font] <text>"
+
+    text_to_artify = text_to_artify.strip()
+    chosen_font = font.strip().lower() if font else "standard"
+
+    # Check if chosen_font is reasonable (pyfiglet will error on invalid ones)
+    # For simplicity, we don't pre-validate against all pyfiglet fonts here,
+    # but we could if AVAILABLE_FIGLET_FONTS was comprehensive or dynamically fetched.
+
+    try:
+        # Pyfiglet can sometimes produce very wide output.
+        # For a bot, might need to consider line wrapping or width limits if output is too large.
+        # Figlet constructor can take width argument.
+        # f = pyfiglet.Figlet(font=chosen_font, width=80) # Example width limit
+        f = pyfiglet.Figlet(font=chosen_font)
+        ascii_art = f.renderText(text_to_artify)
+
+        # Return in a code block for better formatting in most chat clients
+        return f"🎨 ASCII Art (font: {chosen_font}):\n```\n{ascii_art}```"
+    except pyfiglet.FontNotFound:
+        sugg_fonts = ", ".join(AVAILABLE_FIGLET_FONTS[:5]) # Show a few suggestions
+        return f"🚫 Error: Font '{chosen_font}' not found by pyfiglet. Try one of these: {sugg_fonts}..."
+    except Exception as e:
+        # print(f"ASCII art generation error: {e}")
+        return f"🚫 Error: Could not generate ASCII art. ({e})"
+
+# --- Emoji Command (Simple Keyword Search) ---
+EMOJI_KEYWORD_MAP = {
+    "happy": "😄 😊 😂 😃 🥰 🤗 🥳",
+    "sad": "😢 😔 😭 😥 😿",
+    "love": "❤️ 😍 😘 🥰 ♥️ 💕 💌",
+    "angry": "😠 😡 😤 🤬",
+    "laugh": "😂 🤣 😄 😆",
+    "cry": "😭 😢 😿",
+    "food": "🍔 🍕 🍟 🍎 🍓 🍰 🍩",
+    "drink": "🥤 🍹 🍺 ☕ 🍵",
+    "animal": "🐶 🐱 🐭 🦊 🐻 🐼 🐨 🐯 🦁",
+    "cat": "🐱 🐈 😹 😻 😼",
+    "dog": "🐶 🐕 🐩",
+    "money": "💰 💵 🤑 💲",
+    "celebrate": "🎉 🥳 🎊 🎈",
+    "star": "⭐ 🌟 ✨ 💫",
+    "fire": "🔥 🚒",
+    "wave": "👋 👋🏻 👋🏼 👋🏽 👋🏾 👋🏿",
+    "ok": "👌 👍",
+    "yes": "✅ ✔️ 👍",
+    "no": "❌ 🚫 👎",
+    "think": "🤔 🧐 💡",
+    "sleep": "😴 💤",
+    "cool": "😎 🆒",
+    "party": "🎉🥳🎊🎈💃🕺"
+    # Add more keywords and emojis as desired
+}
+
+def find_emojis_for_keyword(keyword: str = None) -> str:
+    """
+    Finds emojis related to a given keyword from a predefined map.
+    """
+    if not keyword or not keyword.strip():
+        available_keywords = ", ".join(sorted(EMOJI_KEYWORD_MAP.keys())[:10]) # Show some
+        return f"😀 Please provide a keyword to search for emojis! Usage: /emoji <keyword>\n" \
+               f"   Try keywords like: {available_keywords}..."
+
+    search_keyword = keyword.strip().lower()
+
+    emojis = EMOJI_KEYWORD_MAP.get(search_keyword)
+
+    if emojis:
+        return f"🎨 Emojis for '{search_keyword}': {emojis}"
+    else:
+        # Simple partial match search (optional, can be expanded)
+        partial_matches = []
+        for k, v in EMOJI_KEYWORD_MAP.items():
+            if search_keyword in k:
+                partial_matches.append(f"'{k}': {v}")
+
+        if partial_matches:
+            return f"😕 No direct match for '{search_keyword}'. Did you mean one of these?\n" + "\n".join(partial_matches[:3]) # Show a few
+        else:
+            return f"😕 Sorry, no emojis found for keyword '{search_keyword}'. Try a more general term."
+
 
 if __name__ == '__main__':
     print("--- Testing Text Utils Commands ---\n")
@@ -204,4 +311,24 @@ if __name__ == '__main__':
     print(f"  'abcdefghijklmnopqrstuvwxyz': {generate_tiny_text('abcdefghijklmnopqrstuvwxyz')}")
     print(f"  'ABCDEFGHIJKLMNOPQRSTUVWXYZ': {generate_tiny_text('ABCDEFGHIJKLMNOPQRSTUVWXYZ')}")
     print(f"  'Special @ Chars !': {generate_tiny_text('Special @ Chars !')}")
+    print("-" * 20 + "\n")
+
+    print("Testing ASCII Art:")
+    if PYFIGLET_AVAILABLE:
+        print(f"  No text: {generate_ascii_art('')}")
+        print(f"  'Hello' (standard font):\n{generate_ascii_art('Hello')}\n")
+        print(f"  'Whiz MD' (slant font):\n{generate_ascii_art('Whiz MD', 'slant')}\n")
+        print(f"  'ASCII' (big font):\n{generate_ascii_art('ASCII', 'big')}\n")
+        print(f"  'Test' (invalid font 'nonexistent'):\n{generate_ascii_art('Test', 'nonexistentfont')}\n")
+    else:
+        print("  Pyfiglet not available, skipping ASCII art tests.")
+    print("-" * 20 + "\n")
+
+    print("Testing Emoji Command:")
+    print(f"  No keyword: {find_emojis_for_keyword()}")
+    print(f"  Keyword 'happy': {find_emojis_for_keyword('happy')}")
+    print(f"  Keyword 'SAD': {find_emojis_for_keyword('SAD')}") # Case-insensitive test
+    print(f"  Keyword 'cat': {find_emojis_for_keyword('cat')}")
+    print(f"  Keyword 'unknown': {find_emojis_for_keyword('unknown')}")
+    print(f"  Keyword 'par': {find_emojis_for_keyword('par')} (for partial match like party)")
     print("-" * 20 + "\n")
