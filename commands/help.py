@@ -8,6 +8,8 @@ COMMANDS_LIST = {
     "/menu": "Displays the main interactive menu.",
     "/stats": "Shows system CPU, memory, and OS statistics.",
     "/about": "Provides information about the bot.",
+    "/support": "Shows the link to the official support group.",
+    "/prefix": "Displays the current command prefixes.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

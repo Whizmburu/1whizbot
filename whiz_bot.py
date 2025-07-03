@@ -12,7 +12,9 @@ from commands.ping import execute_ping as ping_command_handler
 from commands.menu import get_menu_text as menu_command_handler
 from commands.stats import get_system_stats as stats_command_handler
 from commands.about import get_about_info as about_command_handler
-from commands.help import get_help_message as help_command_handler # Added help command
+from commands.help import get_help_message as help_command_handler
+from commands.support import get_support_info as support_command_handler
+from commands.prefix import get_prefix_info as prefix_command_handler # Added prefix command
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -53,6 +55,10 @@ def process_command(command_text):
         print(about_command_handler())
     elif command_text.lower() == "/help":
         print(help_command_handler())
+    elif command_text.lower() == "/support":
+        print(support_command_handler())
+    elif command_text.lower() == "/prefix":
+        print(prefix_command_handler())
     else:
         print(f"Unknown command: {command_text}")
 
