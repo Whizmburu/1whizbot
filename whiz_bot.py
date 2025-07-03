@@ -28,7 +28,11 @@ from commands.shorturl import generate_short_url as shorturl_command_handler
 from commands.weather import fetch_weather_data as weather_command_handler
 from commands.time_cmd import get_current_time_for_timezone as time_command_handler
 from commands.dictionary_cmd import get_word_definition as dictionary_command_handler
-from commands.quote_cmd import get_random_quote as quote_command_handler # Added quote
+from commands.quote_cmd import get_random_quote as quote_command_handler
+from commands.fun_cmds import coin_flip as coinflip_command_handler, \
+                               magic_8_ball as eight_ball_command_handler, \
+                               rate_something as rate_command_handler, \
+                               play_rps as rps_command_handler # Added fun_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -140,6 +144,26 @@ def process_command(command_text):
         print(dictionary_command_handler(word_to_define))
     elif command_text.lower() == "/quote": # /quote usually doesn't take arguments
         print(quote_command_handler())
+    elif command_text.lower() == "/coinflip":
+        print(coinflip_command_handler())
+    elif command_text.lower().startswith("/8ball"):
+        parts = command_text.split(maxsplit=1)
+        question_text = None
+        if len(parts) > 1:
+            question_text = parts[1]
+        print(eight_ball_command_handler(question_text))
+    elif command_text.lower().startswith("/rate"):
+        parts = command_text.split(maxsplit=1)
+        item_to_rate = None
+        if len(parts) > 1:
+            item_to_rate = parts[1]
+        print(rate_command_handler(item_to_rate))
+    elif command_text.lower().startswith("/rps"):
+        parts = command_text.split(maxsplit=1)
+        user_choice = None
+        if len(parts) > 1:
+            user_choice = parts[1]
+        print(rps_command_handler(user_choice))
     else:
         print(f"Unknown command: {command_text}")
 

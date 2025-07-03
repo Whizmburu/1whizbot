@@ -21,6 +21,10 @@ COMMANDS_LIST = {
     "/time [timezone]": "Shows current time. E.g., /time Europe/London or /time for server local.",
     "/dictionary <word>": "Gets definitions for an English word.",
     "/quote": "Fetches a random inspirational quote.",
+    "/coinflip": "Flips a virtual coin (Heads or Tails).",
+    "/8ball <question>": "Asks the Magic 8-Ball a yes/no question.",
+    "/rate [item]": "Rates the specified item (or your vibe) out of 100.",
+    "/rps <choice>": "Play Rock, Paper, Scissors (e.g., /rps rock).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
