@@ -25,6 +25,10 @@ COMMANDS_LIST = {
     "/8ball <question>": "Asks the Magic 8-Ball a yes/no question.",
     "/rate [item]": "Rates the specified item (or your vibe) out of 100.",
     "/rps <choice>": "Play Rock, Paper, Scissors (e.g., /rps rock).",
+    "/truth": "Gives you a random truth question.",
+    "/dare": "Gives you a random dare challenge.",
+    "/ship <name1> [name2]": "Calculates love compatibility between names.",
+    "/guess <number>": "Guess a number (1-10). Bot tells you if you're right!",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

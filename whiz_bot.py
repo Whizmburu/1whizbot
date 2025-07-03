@@ -32,7 +32,11 @@ from commands.quote_cmd import get_random_quote as quote_command_handler
 from commands.fun_cmds import coin_flip as coinflip_command_handler, \
                                magic_8_ball as eight_ball_command_handler, \
                                rate_something as rate_command_handler, \
-                               play_rps as rps_command_handler # Added fun_cmds
+                               play_rps as rps_command_handler, \
+                               get_truth_question as truth_command_handler, \
+                               get_dare_challenge as dare_command_handler, \
+                               calculate_ship_percentage as ship_command_handler, \
+                               guess_the_number as guess_command_handler # Added fun_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -164,6 +168,42 @@ def process_command(command_text):
         if len(parts) > 1:
             user_choice = parts[1]
         print(rps_command_handler(user_choice))
+    elif command_text.lower() == "/truth":
+        print(truth_command_handler())
+    elif command_text.lower() == "/dare":
+        print(dare_command_handler())
+    elif command_text.lower().startswith("/ship"):
+        parts = command_text.split(maxsplit=2) # /ship name1 name2
+        name1 = None
+        name2 = None
+        if len(parts) > 1:
+            name1 = parts[1]
+        if len(parts) > 2: # This logic is slightly off, split should give 3 parts if two names after /ship
+            # Corrected parsing:
+            # If /ship name1 name2, parts = ["/ship", "name1", "name2"]
+            # If /ship name1, parts = ["/ship", "name1"]
+            # If /ship, parts = ["/ship"]
+            # The split in the command handler is more robust if we pass the arg string.
+            # Let's pass the argument string to the handler.
+            arg_str = ""
+            if len(command_text.split(maxsplit=1)) > 1:
+                arg_str = command_text.split(maxsplit=1)[1]
+
+            # The ship_command_handler expects name1, name2. We need to parse them here.
+            name_parts = arg_str.strip().split(maxsplit=1)
+            if len(name_parts) >= 1:
+                name1 = name_parts[0]
+            if len(name_parts) >= 2:
+                name2 = name_parts[1]
+            print(ship_command_handler(name1, name2)) # Call with potentially None for name2
+        else: # Only /ship or /ship name1 was provided
+             print(ship_command_handler(name1)) # Let handler deal with name2 being None
+    elif command_text.lower().startswith("/guess"):
+        parts = command_text.split(maxsplit=1)
+        user_guess = None
+        if len(parts) > 1:
+            user_guess = parts[1]
+        print(guess_command_handler(user_guess))
     else:
         print(f"Unknown command: {command_text}")
 
