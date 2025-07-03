@@ -36,7 +36,11 @@ from commands.fun_cmds import coin_flip as coinflip_command_handler, \
                                get_truth_question as truth_command_handler, \
                                get_dare_challenge as dare_command_handler, \
                                calculate_ship_percentage as ship_command_handler, \
-                               guess_the_number as guess_command_handler # Added fun_cmds
+                               guess_the_number as guess_command_handler
+from commands.text_utils_cmds import reverse_text as reverse_command_handler, \
+                                     generate_fancy_text as fancy_command_handler, \
+                                     generate_zalgo_text as zalgo_command_handler, \
+                                     generate_tiny_text as tinytext_command_handler # Added text_utils
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -204,6 +208,75 @@ def process_command(command_text):
         if len(parts) > 1:
             user_guess = parts[1]
         print(guess_command_handler(user_guess))
+    elif command_text.lower().startswith("/reverse"):
+        parts = command_text.split(maxsplit=1)
+        text_to_reverse = None
+        if len(parts) > 1:
+            text_to_reverse = parts[1]
+        print(reverse_command_handler(text_to_reverse))
+    elif command_text.lower().startswith("/fancy"):
+        parts = command_text.split(maxsplit=1) # /fancy args
+        args_str = None
+        if len(parts) > 1:
+            args_str = parts[1]
+
+        # Try to parse style and text
+        # /fancy <style> <text> OR /fancy <text>
+        style_choice = None
+        text_to_fancy = None
+
+        if args_str:
+            arg_parts = args_str.strip().split(maxsplit=1)
+            # Check if first part is a known style (simple check, assumes styles are single words without spaces)
+            # A more robust way would be to check against FANCY_STYLES.keys() from text_utils_cmds
+            # but that would require importing FANCY_STYLES or passing it around.
+            # For now, we assume styles are single words and don't clash with typical text.
+            potential_style = arg_parts[0].lower()
+            # This is a heuristic: if it's a short word and we have more parts, assume it's a style.
+            # Better: `commands.text_utils_cmds.FANCY_STYLES.keys()`
+            # For now, the handler `generate_fancy_text` will also try to parse this.
+            # Let's pass the full arg string to the handler and let it decide.
+            # The handler `generate_fancy_text` is not designed to parse style from text_to_fancy.
+            # It expects style_choice and text_to_fancy separately.
+
+            # Re-parsing strategy:
+            # First word is potential style. If it's a known style, rest is text.
+            # Otherwise, all of args_str is text for default style.
+            from commands.text_utils_cmds import FANCY_STYLES as fancy_style_options # Import for check
+            if arg_parts[0].lower() in fancy_style_options.keys() and len(arg_parts) > 1:
+                style_choice = arg_parts[0].lower()
+                text_to_fancy = arg_parts[1]
+            else: # First part is not a known style, or only one part given (so it's text)
+                text_to_fancy = args_str
+
+        print(fancy_command_handler(text_to_fancy, style_choice))
+    elif command_text.lower().startswith("/zalgo"):
+        parts = command_text.split(maxsplit=1) # /zalgo args
+        args_str = None
+        if len(parts) > 1:
+            args_str = parts[1]
+
+        intensity = "normal" # Default intensity
+        text_to_zalgo = None
+
+        if args_str:
+            arg_parts = args_str.strip().split(maxsplit=1)
+            # Potential intensities: low, normal, high, max
+            potential_intensity = arg_parts[0].lower()
+            valid_intensities = ["low", "normal", "high", "max"]
+            if potential_intensity in valid_intensities and len(arg_parts) > 1:
+                intensity = potential_intensity
+                text_to_zalgo = arg_parts[1]
+            else: # First part is not a known intensity, or only one part given (so it's text)
+                text_to_zalgo = args_str
+
+        print(zalgo_command_handler(text_to_zalgo, intensity))
+    elif command_text.lower().startswith("/tinytext"):
+        parts = command_text.split(maxsplit=1)
+        text_to_tiny = None
+        if len(parts) > 1:
+            text_to_tiny = parts[1]
+        print(tinytext_command_handler(text_to_tiny))
     else:
         print(f"Unknown command: {command_text}")
 

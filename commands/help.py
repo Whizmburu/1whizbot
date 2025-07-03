@@ -29,6 +29,10 @@ COMMANDS_LIST = {
     "/dare": "Gives you a random dare challenge.",
     "/ship <name1> [name2]": "Calculates love compatibility between names.",
     "/guess <number>": "Guess a number (1-10). Bot tells you if you're right!",
+    "/reverse <text>": "Reverses the provided text.",
+    "/fancy [style] <text>": "Converts text to fancy Unicode. Styles: bold_serif, script, fraktur.",
+    "/zalgo [intensity] <text>": "Converts text to Zalgo (glitch) text. Intensities: low, normal, high, max.",
+    "/tinytext <text>": "Converts text to tiny Unicode (small caps).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
