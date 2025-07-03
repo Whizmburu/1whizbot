@@ -24,7 +24,8 @@ from commands.invite import get_invite_message as invite_command_handler
 from commands.calc import evaluate_expression as calc_command_handler
 from commands.qr import generate_qr_image as qr_command_handler
 from commands.translate import translate_text_command as translate_command_handler
-from commands.shorturl import generate_short_url as shorturl_command_handler # Added shorturl
+from commands.shorturl import generate_short_url as shorturl_command_handler
+from commands.weather import fetch_weather_data as weather_command_handler # Added weather
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -116,6 +117,12 @@ def process_command(command_text):
         if len(parts) > 1:
             url_to_shorten = parts[1]
         print(shorturl_command_handler(url_to_shorten))
+    elif command_text.lower().startswith("/weather"):
+        parts = command_text.split(maxsplit=1)
+        location_query = ""
+        if len(parts) > 1:
+            location_query = parts[1]
+        print(weather_command_handler(location_query))
     else:
         print(f"Unknown command: {command_text}")
 

@@ -17,6 +17,7 @@ COMMANDS_LIST = {
     "/qr <text>": "Generates a QR code from the provided text.",
     "/translate [src] <tgt> <text>": "Translates text. E.g.: /translate es hello world",
     "/shorturl <url>": "Shortens a long URL using TinyURL.",
+    "/weather <location>": "Fetches current weather for a location (e.g., /weather London).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
