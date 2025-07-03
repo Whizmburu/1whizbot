@@ -10,7 +10,9 @@ import utils.uptime # This will set utils.uptime.BOT_START_TIME
 from utils.env_loader import load_env, validate_session_id, get_env_variable
 from commands.ping import execute_ping as ping_command_handler
 from commands.menu import get_menu_text as menu_command_handler
-from commands.stats import get_system_stats as stats_command_handler # Added stats command
+from commands.stats import get_system_stats as stats_command_handler
+from commands.about import get_about_info as about_command_handler
+from commands.help import get_help_message as help_command_handler # Added help command
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -47,12 +49,10 @@ def process_command(command_text):
         print(menu_command_handler())
     elif command_text.lower() == "/stats":
         print(stats_command_handler())
-    elif command_text.lower() == "/help": # Placeholder for help
-        print("Available commands:\n"
-              "/ping - Check bot's responsiveness and uptime.\n"
-              "/menu - Display the main menu.\n"
-              "/stats - Show system statistics.")
-        # More commands will be added here
+    elif command_text.lower() == "/about":
+        print(about_command_handler())
+    elif command_text.lower() == "/help":
+        print(help_command_handler())
     else:
         print(f"Unknown command: {command_text}")
 
