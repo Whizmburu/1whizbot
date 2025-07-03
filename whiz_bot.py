@@ -22,7 +22,8 @@ from commands.setprefix import update_prefix_list as setprefix_command_handler
 from commands.report import get_report_message as report_command_handler
 from commands.invite import get_invite_message as invite_command_handler
 from commands.calc import evaluate_expression as calc_command_handler
-from commands.qr import generate_qr_image as qr_command_handler # Added qr
+from commands.qr import generate_qr_image as qr_command_handler
+from commands.translate import translate_text_command as translate_command_handler # Added translate
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -102,6 +103,12 @@ def process_command(command_text):
         if len(parts) > 1:
             text_to_encode = parts[1]
         print(qr_command_handler(text_to_encode))
+    elif command_text.lower().startswith("/translate"):
+        parts = command_text.split(maxsplit=1)
+        args_str = ""
+        if len(parts) > 1:
+            args_str = parts[1]
+        print(translate_command_handler(args_str))
     else:
         print(f"Unknown command: {command_text}")
 
