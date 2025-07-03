@@ -16,6 +16,7 @@ COMMANDS_LIST = {
     "/calc <expression>": "Calculates a mathematical expression (e.g., /calc 2+2*5).",
     "/qr <text>": "Generates a QR code from the provided text.",
     "/translate [src] <tgt> <text>": "Translates text. E.g.: /translate es hello world",
+    "/shorturl <url>": "Shortens a long URL using TinyURL.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
