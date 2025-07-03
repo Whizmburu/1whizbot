@@ -18,6 +18,9 @@ COMMANDS_LIST = {
     "/translate [src] <tgt> <text>": "Translates text. E.g.: /translate es hello world",
     "/shorturl <url>": "Shortens a long URL using TinyURL.",
     "/weather <location>": "Fetches current weather for a location (e.g., /weather London).",
+    "/time [timezone]": "Shows current time. E.g., /time Europe/London or /time for server local.",
+    "/dictionary <word>": "Gets definitions for an English word.",
+    "/quote": "Fetches a random inspirational quote.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

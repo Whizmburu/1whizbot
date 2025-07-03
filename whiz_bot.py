@@ -25,7 +25,10 @@ from commands.calc import evaluate_expression as calc_command_handler
 from commands.qr import generate_qr_image as qr_command_handler
 from commands.translate import translate_text_command as translate_command_handler
 from commands.shorturl import generate_short_url as shorturl_command_handler
-from commands.weather import fetch_weather_data as weather_command_handler # Added weather
+from commands.weather import fetch_weather_data as weather_command_handler
+from commands.time_cmd import get_current_time_for_timezone as time_command_handler
+from commands.dictionary_cmd import get_word_definition as dictionary_command_handler
+from commands.quote_cmd import get_random_quote as quote_command_handler # Added quote
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -123,6 +126,20 @@ def process_command(command_text):
         if len(parts) > 1:
             location_query = parts[1]
         print(weather_command_handler(location_query))
+    elif command_text.lower().startswith("/time"):
+        parts = command_text.split(maxsplit=1)
+        timezone_str = None # Default to None for local time
+        if len(parts) > 1:
+            timezone_str = parts[1]
+        print(time_command_handler(timezone_str))
+    elif command_text.lower().startswith("/dictionary"):
+        parts = command_text.split(maxsplit=1)
+        word_to_define = ""
+        if len(parts) > 1:
+            word_to_define = parts[1]
+        print(dictionary_command_handler(word_to_define))
+    elif command_text.lower() == "/quote": # /quote usually doesn't take arguments
+        print(quote_command_handler())
     else:
         print(f"Unknown command: {command_text}")
 
