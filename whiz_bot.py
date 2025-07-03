@@ -7,6 +7,9 @@ import os # For dummy .env creation, can be removed later
 # A more robust solution might involve a shared context or explicit initialization function.
 import utils.uptime # This will set utils.uptime.BOT_START_TIME
 
+# Global state for runtime configurations
+ACTIVE_PREFIXES = ["/", ".", "#", "whz", "!"] # Default prefixes
+
 from utils.env_loader import load_env, validate_session_id, get_env_variable
 from commands.ping import execute_ping as ping_command_handler
 from commands.menu import get_menu_text as menu_command_handler
@@ -14,7 +17,8 @@ from commands.stats import get_system_stats as stats_command_handler
 from commands.about import get_about_info as about_command_handler
 from commands.help import get_help_message as help_command_handler
 from commands.support import get_support_info as support_command_handler
-from commands.prefix import get_prefix_info as prefix_command_handler # Added prefix command
+from commands.prefix import get_prefix_info as prefix_command_handler
+from commands.setprefix import update_prefix_list as setprefix_command_handler # Added setprefix
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -43,7 +47,13 @@ def process_command(command_text):
     Basic command processor.
     In a real bot, this would parse messages from WhatsApp.
     """
+    global ACTIVE_PREFIXES # Declare global at the very start of the function.
     command_received_time = time.time() # Timestamp when command processing starts
+
+    # Command matching logic:
+    # For now, we're still using simple direct matches for commands.
+    # The ACTIVE_PREFIXES list is managed but not yet used to parse commands.
+    # This will be a future refactor.
 
     if command_text.lower() == "/ping":
         print(ping_command_handler(command_received_time))
@@ -58,7 +68,20 @@ def process_command(command_text):
     elif command_text.lower() == "/support":
         print(support_command_handler())
     elif command_text.lower() == "/prefix":
-        print(prefix_command_handler())
+        # Now that ACTIVE_PREFIXES is declared global for the function,
+        # this read refers to the global.
+        print(prefix_command_handler(ACTIVE_PREFIXES))
+    elif command_text.lower().startswith("/setprefix"):
+        # No need for another 'global' declaration here.
+        parts = command_text.split(maxsplit=1)
+        new_prefixes_str = ""
+        if len(parts) > 1:
+            new_prefixes_str = parts[1]
+
+        new_list, message = setprefix_command_handler(new_prefixes_str)
+        if new_list is not None: # Check if update was successful
+            ACTIVE_PREFIXES = new_list # Assignment to global
+        print(message) # Print success or error message from handler
     else:
         print(f"Unknown command: {command_text}")
 
