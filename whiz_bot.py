@@ -20,7 +20,9 @@ from commands.support import get_support_info as support_command_handler
 from commands.prefix import get_prefix_info as prefix_command_handler
 from commands.setprefix import update_prefix_list as setprefix_command_handler
 from commands.report import get_report_message as report_command_handler
-from commands.invite import get_invite_message as invite_command_handler # Added invite
+from commands.invite import get_invite_message as invite_command_handler
+from commands.calc import evaluate_expression as calc_command_handler
+from commands.qr import generate_qr_image as qr_command_handler # Added qr
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -88,6 +90,18 @@ def process_command(command_text):
         print(report_command_handler())
     elif command_text.lower() == "/invite":
         print(invite_command_handler())
+    elif command_text.lower().startswith("/calc"):
+        parts = command_text.split(maxsplit=1)
+        expression_str = ""
+        if len(parts) > 1:
+            expression_str = parts[1]
+        print(calc_command_handler(expression_str))
+    elif command_text.lower().startswith("/qr"):
+        parts = command_text.split(maxsplit=1)
+        text_to_encode = ""
+        if len(parts) > 1:
+            text_to_encode = parts[1]
+        print(qr_command_handler(text_to_encode))
     else:
         print(f"Unknown command: {command_text}")
 

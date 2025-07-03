@@ -13,6 +13,8 @@ COMMANDS_LIST = {
     "/setprefix <prefixes>": "Sets new command prefixes (e.g., /setprefix ! $).",
     "/report": "Shows instructions on how to report bugs or issues.",
     "/invite": "Shows information on how to invite the bot or share it.",
+    "/calc <expression>": "Calculates a mathematical expression (e.g., /calc 2+2*5).",
+    "/qr <text>": "Generates a QR code from the provided text.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
