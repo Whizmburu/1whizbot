@@ -120,3 +120,137 @@ if __name__ == '__main__':
     print(f"\n  None input: {format_json_string(None)}")
     print(f"\n  Non-JSON string: {format_json_string('Just some random text')}")
     print("-" * 20 + "\n")
+
+# --- WHOIS Lookup Command ---
+import datetime # Import the standard datetime module
+try:
+    import whois
+    # from whois.parser import PywhoisError # Specific error type
+    PYTHON_WHOIS_AVAILABLE = True
+except ImportError:
+    PYTHON_WHOIS_AVAILABLE = False
+    # class PywhoisError(Exception): pass # Define for type hinting if needed
+    # class whois: pass # Dummy class if whois is not available, to prevent NameError on whois.datetime below.
+                       # This is not ideal, better to guard access to whois.datetime.
+
+def format_whois_value(value):
+    """Helper to format WHOIS values, especially dates and lists."""
+    if isinstance(value, list):
+        # If all items are datetime objects, format them
+        # Ensure whois is available before trying to access whois.datetime
+        if PYTHON_WHOIS_AVAILABLE and all(isinstance(item, datetime.datetime) for item in value): # Corrected: datetime.datetime
+            return ", ".join([item.strftime('%Y-%m-%d %H:%M:%S UTC') for item in value])
+        return ", ".join(map(str, value)) # Join list elements as strings
+    elif PYTHON_WHOIS_AVAILABLE and isinstance(value, datetime.datetime): # Corrected: datetime.datetime
+        return value.strftime('%Y-%m-%d %H:%M:%S UTC')
+    return str(value) if value is not None else "N/A"
+
+def fetch_whois_data(domain_name: str = None) -> str:
+    """
+    Fetches WHOIS information for a given domain name.
+    """
+    if not PYTHON_WHOIS_AVAILABLE:
+        return "🚫 Error: The 'python-whois' library is not installed. Cannot perform WHOIS lookup."
+
+    if not domain_name or not domain_name.strip():
+        return "🚫 Error: No domain name provided. Usage: /whois <domain_name>"
+
+    domain_to_lookup = domain_name.strip().lower()
+    # Basic sanity check for domain format, though whois library might handle variations.
+    # A simple check: does it contain at least one dot and no spaces?
+    if " " in domain_to_lookup or "." not in domain_to_lookup:
+        return f"🚫 Error: Invalid domain format: '{domain_name}'. Please provide a valid domain (e.g., example.com)."
+
+    try:
+        w = whois.whois(domain_to_lookup)
+
+        if not w or not w.domain_name: # Check if any result was returned or if domain_name is empty
+             # Sometimes python-whois returns an empty result for domains not found or certain TLDs
+             # Or if the domain_name attribute itself is None or empty after query
+            if hasattr(w, 'text') and w.text: # If there's raw text, it might mean no structured data
+                 # This case is tricky, as w.text might exist even for successful lookups.
+                 # The library's behavior for "not found" can vary.
+                 # Let's assume if w.domain_name is missing, it's likely a "not found" or unsupported TLD.
+                return f"ℹ️ WHOIS lookup for '{domain_to_lookup}' did not return structured data or the domain may not exist.\n" \
+                       f"   Raw output snippet (first 500 chars):\n```\n{w.text[:500]}...\n```"
+            return f"🚫 Error: Could not retrieve WHOIS data for '{domain_to_lookup}'. Domain may not exist or WHOIS server unavailable."
+
+        # Format the output
+        # Key attributes to display. The python-whois library normalizes many of these.
+        key_info = {
+            "Domain Name": w.domain_name, # Often a list
+            "Registrar": w.registrar,
+            "WHOIS Server": w.whois_server,
+            "Referral URL": w.referral_url, # Usually for the registrar
+            "Updated Date": w.updated_date,
+            "Creation Date": w.creation_date,
+            "Expiration Date": w.expiration_date,
+            "Name Servers": w.name_servers, # List
+            "Status": w.status, # List or string
+            "Emails": w.emails, # List
+            "DNSSEC": w.dnssec,
+            "Registrant Name": w.name, # Registrant's name
+            "Organization": w.org, # Registrant's organization
+            "Address": w.address,
+            "City": w.city,
+            "State": w.state,
+            "Zipcode": w.zipcode,
+            "Country": w.country,
+        }
+
+        output_parts = [f"🔍 WHOIS Information for: {format_whois_value(w.domain_name)}"]
+        output_parts.append("-----------------------------------")
+
+        for key, value in key_info.items():
+            if value is not None: # Only show fields that have a value
+                formatted_value = format_whois_value(value)
+                if formatted_value != "N/A" and formatted_value.strip() != "": # Check if value is actually useful
+                    output_parts.append(f"🔹 {key}: {formatted_value}")
+
+        output_parts.append("-----------------------------------")
+        output_parts.append("Note: WHOIS data can vary by registrar and TLD.")
+
+        return "\n".join(output_parts)
+
+    except whois.parser.PywhoisError as e: # Catch errors from the whois library itself
+        # This can include "No match for..." or other parsing issues.
+        return f"🚫 Error: WHOIS lookup failed for '{domain_to_lookup}'. Domain may not exist or no WHOIS entry found. ({e})"
+    except Exception as e:
+        # print(f"WHOIS command error: {e}") # For logging
+        return f"🚫 Error: An unexpected error occurred during WHOIS lookup for '{domain_to_lookup}'. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Dev Tools Commands ---\n")
+
+    print("Testing Base64:")
+    # ... (base64 tests remain the same)
+    print(f"  Encode 'Hello World': {handle_base64('encode', 'Hello World')}")
+    print(f"  Decode 'SGVsbG8gV29ybGQ=': {handle_base64('decode', 'SGVsbG8gV29ybGQ=')}")
+    print(f"  Decode (invalid base64 string '!!!'): {handle_base64('decode', '!!!')}")
+    print("-" * 20 + "\n")
+
+    print("Testing JSON Formatter:")
+    # ... (jsonfmt tests remain the same)
+    valid_json_compact = '{"name": "Whiz-MD", "version": 1.0, "features": ["utility", "fun", {"text": "tools"}], "active": true}'
+    print(f"  Valid compact JSON: {format_json_string(valid_json_compact)}")
+    print("-" * 20 + "\n")
+
+    print("Testing WHOIS Lookup:")
+    if PYTHON_WHOIS_AVAILABLE:
+        test_domains = [
+            "google.com",
+            "github.com",
+            "nonexistentdomain123xyz.com", # Should fail or return no data
+            "example.org",
+            "", # Empty input
+            "invalid domain", # Invalid format
+            "faketld.thistlddoesnotexist"
+        ]
+        for i, domain in enumerate(test_domains):
+            print(f"--- WHOIS Test {i+1}: '{domain}' ---")
+            result = fetch_whois_data(domain)
+            print(f"{result}\n")
+    else:
+        print("  python-whois library not available, skipping WHOIS tests.")
+    print("-" * 20 + "\n")
