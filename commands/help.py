@@ -49,6 +49,7 @@ COMMANDS_LIST = {
     "/anime <query>": "Searches for an anime and shows details from MyAnimeList (via Jikan).",
     "/ask <prompt>": "Asks a question to the AI (OpenAI GPT). Requires API key.",
     "/imagegen <prompt>": "Generates an image from text using AI (OpenAI DALL·E). Requires API key.",
+    "/summarize [len] <text>": "Summarizes text using AI. Len: short, medium (default), long.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

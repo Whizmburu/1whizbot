@@ -56,7 +56,8 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
                                      fetch_movie_details as movie_command_handler, \
                                      search_jikan_anime as anime_command_handler
 from commands.ai_cmds import get_ai_response as ask_command_handler, \
-                               generate_ai_image_from_prompt as imagegen_command_handler # Added AI command
+                               generate_ai_image_from_prompt as imagegen_command_handler, \
+                               get_ai_summary as summarize_command_handler # Added AI command
 
 
 # Store bot's actual start time for uptime calculation consistency
@@ -453,6 +454,27 @@ def process_command(command_text):
         # For now, using default n, size, model.
         # These could be parsed from args_str if desired later.
         print(imagegen_command_handler(image_prompt_str))
+    elif command_text.lower().startswith("/summarize"):
+        parts = command_text.split(maxsplit=1)
+        args_str_summarize = None
+        if len(parts) > 1:
+            args_str_summarize = parts[1]
+
+        length_option = "medium" # Default
+        text_to_summarize = None
+
+        if args_str_summarize:
+            arg_parts_summarize = args_str_summarize.strip().split(maxsplit=1)
+            potential_length_opt = arg_parts_summarize[0].lower()
+            valid_length_opts = ["short", "medium", "long"]
+
+            if potential_length_opt in valid_length_opts and len(arg_parts_summarize) > 1:
+                length_option = potential_length_opt
+                text_to_summarize = arg_parts_summarize[1]
+            else: # First part is not a known length option, or only one part given
+                text_to_summarize = args_str_summarize
+
+        print(summarize_command_handler(text_to_summarize, length_option))
     else:
         print(f"Unknown command: {command_text}")
 

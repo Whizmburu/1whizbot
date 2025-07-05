@@ -231,3 +231,124 @@ if __name__ == '__main__':
         print("  Skipping further OpenAI Image Generation tests as OPENAI_API_KEY is not set or invalid in .env.\n")
 
     print("-" * 20 + "\n")
+
+# --- AI Text Summarization Command ---
+def get_ai_summary(text_to_summarize: str = None, length_option: str = "medium") -> str:
+    """
+    Summarizes a given text using OpenAI's chat completion API.
+    length_option can be "short", "medium", "long".
+    """
+    if not OPENAI_AVAILABLE:
+        return "🚫 Error: The 'openai' library is not installed. Cannot use AI summarization."
+
+    api_key = get_env_variable("OPENAI_API_KEY")
+    bot_name = get_env_variable("BOT_NAME", "WHIZ-MD")
+
+    if not api_key or not api_key.startswith("sk-"):
+        return f"🚫 Error: OpenAI API key is not configured or invalid for {bot_name}.\n" \
+               f"Please set a valid OPENAI_API_KEY (starting with 'sk-') in the .env file."
+
+    if not text_to_summarize or not text_to_summarize.strip():
+        return "📝 Please provide text to summarize. Usage: /summarize [short|medium|long] <your text>"
+
+    length_instructions = {
+        "short": "Provide a very concise summary, ideally 1-2 sentences or a few key bullet points.",
+        "medium": "Provide a concise summary, about one paragraph or 3-5 key bullet points.",
+        "long": "Provide a more detailed summary, potentially multiple paragraphs or a comprehensive list of key points, but still significantly shorter than the original."
+    }
+
+    length_guidance = length_instructions.get(length_option.lower(), length_instructions["medium"])
+
+    system_prompt = f"You are an expert text summarizer. Your goal is to extract the key information and present it clearly. {length_guidance}"
+    user_content = f"Please summarize the following text:\n\n---\n{text_to_summarize.strip()}\n---"
+
+    try:
+        client = OpenAI()
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo", # Good balance of capability and cost for summarization
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ],
+            max_tokens=300,  # Adjust based on expected summary length, plus some buffer
+            temperature=0.5  # Lower temperature for more factual, less creative summaries
+        )
+
+        summary = chat_completion.choices[0].message.content
+
+        if not summary or not summary.strip():
+            return "🤔 The AI analyzed the text but couldn't produce a summary. The text might be too short or unclear."
+
+        return f"✍️ **Summary (Length: {length_option.capitalize()}):**\n\n{summary.strip()}"
+
+    except AuthenticationError:
+        return "🚫 Error: OpenAI API Key is invalid or has insufficient permissions. Please check your key."
+    except RateLimitError:
+        return "🚫 Error: OpenAI API rate limit exceeded for summarization. Please try again later."
+    except APIError as e:
+        # print(f"OpenAI Summarize APIError: {e}")
+        return f"🚫 Error: An issue occurred with the OpenAI API during summarization. (Status: {e.status_code if hasattr(e, 'status_code') else 'N/A'}, Message: {e.message if hasattr(e, 'message') else str(e)})"
+    except Exception as e:
+        # print(f"Summarize command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while summarizing the text. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing AI Commands ---\n")
+
+    # ... (previous AI command tests remain the same) ...
+    print("Testing AI Ask Command (/ask):")
+    original_openai_key = get_env_variable("OPENAI_API_KEY") # Ensure this is at the start of __main__ if other tests modify os.environ
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Ask 'What is 2+2?': (result snippet)\n{get_ai_response('What is 2+2?')[:100]}...\n")
+    else:
+        print("  Skipping /ask test as OPENAI_API_KEY is not set or invalid in .env.\n")
+    print("-" * 20 + "\n")
+
+    print("Testing AI Image Generation Command (/imagegen):")
+    # ... (imagegen tests remain the same) ...
+    if original_openai_key and original_openai_key.startswith("sk-"):
+         print(f"  Imagegen 'A red apple on a table' (result snippet):\n{generate_ai_image_from_prompt('A red apple on a table', size='256x256')[:150]}...\n")
+    else:
+        print("  Skipping /imagegen test as OPENAI_API_KEY is not set or invalid in .env.\n")
+    print("-" * 20 + "\n")
+
+    print("Testing AI Summarize Command (/summarize):")
+    sample_text_short = "The quick brown fox jumps over the lazy dog. This is a classic pangram used to test typefaces."
+    sample_text_long = """
+    The OpenAI API provides access to powerful artificial intelligence models like GPT-3.5-turbo and GPT-4 for a variety of tasks
+    including text generation, translation, summarization, and code generation. To use the API, developers need to sign up for an
+    API key and can then make requests via HTTP or using official client libraries available in several programming languages such as Python.
+    The API is priced based on usage, typically per token (input and output). It's important for developers to manage their API key securely
+    and monitor their usage to control costs. OpenAI also enforces usage policies to prevent misuse of the technology, including generating
+    harmful content. For tasks like summarization, providing clear instructions and context within the prompt can significantly improve the
+    quality of the output. Different models may have different strengths, token limits, and pricing structures.
+    """
+
+    print("  --- Test Case 1: OpenAI API Key Missing/Invalid (simulated for summarize) ---")
+    current_key_for_test = os.environ.get("OPENAI_API_KEY") # Save current state
+    os.environ["OPENAI_API_KEY"] = "INVALID_KEY_NO_SK_PREFIX"
+    print(f"  Output (invalid key format): {get_ai_summary(sample_text_short)}\n")
+    if current_key_for_test is not None: # Restore
+         os.environ["OPENAI_API_KEY"] = current_key_for_test
+    else: # If it was never set, remove the temp invalid one
+        if "OPENAI_API_KEY" in os.environ and os.environ["OPENAI_API_KEY"] == "INVALID_KEY_NO_SK_PREFIX":
+            del os.environ["OPENAI_API_KEY"]
+
+    print("  --- Test Case 2: No Text Provided ---")
+    print(f"  Output (no text): {get_ai_summary('')}\n")
+
+    if original_openai_key and original_openai_key.startswith("sk-"): # Use the key fetched at start of __main__
+        print("  --- Test Case 3: Short Text, Medium Summary (requires valid API key) ---")
+        print(f"  Summary for short text:\n{get_ai_summary(sample_text_short, length_option='medium')}\n")
+
+        print("  --- Test Case 4: Long Text, Short Summary ---")
+        print(f"  Summary for long text (short):\n{get_ai_summary(sample_text_long, length_option='short')}\n")
+
+        print("  --- Test Case 5: Long Text, Long Summary ---")
+        print(f"  Summary for long text (long):\n{get_ai_summary(sample_text_long, length_option='long')}\n")
+    else:
+        print("  Skipping further OpenAI Summarize tests as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("-" * 20 + "\n")
