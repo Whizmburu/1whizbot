@@ -254,3 +254,138 @@ if __name__ == '__main__':
     else:
         print("  python-whois library not available, skipping WHOIS tests.")
     print("-" * 20 + "\n")
+
+# --- DNS Lookup Command ---
+try:
+    import dns.resolver
+    import dns.exception
+    DNSPYTHON_AVAILABLE = True
+    SUPPORTED_RECORD_TYPES = ["A", "AAAA", "MX", "TXT", "CNAME", "NS", "SOA", "SRV", "PTR"] # Common types
+except ImportError:
+    DNSPYTHON_AVAILABLE = False
+    SUPPORTED_RECORD_TYPES = []
+    # Define dummy exceptions if dnspython is not available, for type hinting or isinstance checks
+    # class dns:
+    #     class resolver: class NXDOMAIN(Exception): pass; class NoAnswer(Exception): pass; class Timeout(Exception): pass
+    #     class exception: class DNSException(Exception): pass
+
+
+def format_dns_answer(answer, record_type):
+    """Helper to format different DNS record types."""
+    record_type = record_type.upper()
+    if record_type == "A":
+        return answer.address
+    elif record_type == "AAAA":
+        return answer.address
+    elif record_type == "MX":
+        return f"{answer.preference} {answer.exchange.to_text(omit_final_dot=True)}"
+    elif record_type == "TXT":
+        # TXT records can be list of bytes strings, join them
+        return " ".join(b.decode('utf-8') for b in answer.strings)
+    elif record_type == "CNAME":
+        return answer.target.to_text(omit_final_dot=True)
+    elif record_type == "NS":
+        return answer.target.to_text(omit_final_dot=True)
+    elif record_type == "SOA": # More complex, just show main parts
+        return f"MNAME: {answer.mname.to_text(omit_final_dot=True)}, RNAME: {answer.rname.to_text(omit_final_dot=True)}, Serial: {answer.serial}"
+    elif record_type == "SRV":
+        return f"{answer.priority} {answer.weight} {answer.port} {answer.target.to_text(omit_final_dot=True)}"
+    elif record_type == "PTR":
+        return answer.target.to_text(omit_final_dot=True)
+    return str(answer) # Fallback
+
+def fetch_dns_records(domain_name: str = None, record_type: str = "A") -> str:
+    """
+    Fetches DNS records for a given domain name and record type.
+    """
+    if not DNSPYTHON_AVAILABLE:
+        return "🚫 Error: The 'dnspython' library is not installed. Cannot perform DNS lookup."
+
+    if not domain_name or not domain_name.strip():
+        return "🚫 Error: No domain name provided. Usage: /dns <domain_name> [record_type]"
+
+    domain_to_lookup = domain_name.strip().lower()
+    req_record_type = record_type.strip().upper() if record_type else "A"
+
+    if req_record_type not in SUPPORTED_RECORD_TYPES:
+        return f"🚫 Error: Unsupported DNS record type '{req_record_type}'. Supported types: {', '.join(SUPPORTED_RECORD_TYPES)}"
+
+    try:
+        answers = dns.resolver.resolve(domain_to_lookup, req_record_type)
+
+        if not answers: # Should be caught by NoAnswer, but as a safeguard
+            return f"ℹ️ No {req_record_type} records found for '{domain_to_lookup}'."
+
+        output_parts = [f"🔍 DNS {req_record_type} Records for: {domain_to_lookup}"]
+        output_parts.append("-----------------------------------")
+
+        for rdata in answers:
+            output_parts.append(f"  🔹 {format_dns_answer(rdata, req_record_type)}")
+
+        if not output_parts[2:]: # If only header and separator, means no records were formatted (shouldn't happen if answers exist)
+             return f"ℹ️ No {req_record_type} records found or could not format for '{domain_to_lookup}'."
+
+        return "\n".join(output_parts)
+
+    except dns.resolver.NXDOMAIN:
+        return f"🚫 Error: Domain '{domain_to_lookup}' does not exist (NXDOMAIN)."
+    except dns.resolver.NoAnswer:
+        return f"ℹ️ No {req_record_type} records found for '{domain_to_lookup}'."
+    except dns.resolver.Timeout:
+        return f"🚫 Error: DNS query for '{domain_to_lookup}' [{req_record_type}] timed out."
+    except dns.exception.DNSException as e: # Catch other dnspython specific exceptions
+        # print(f"DNS lookup error (DNSException): {e}")
+        return f"🚫 Error during DNS lookup for '{domain_to_lookup}' [{req_record_type}]: {e}"
+    except Exception as e:
+        # print(f"DNS command error: {e}")
+        return f"🚫 Error: An unexpected error occurred during DNS lookup. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Dev Tools Commands ---\n")
+
+    print("Testing Base64:")
+    # ... (base64 tests remain the same)
+    print(f"  Encode 'Hello World': {handle_base64('encode', 'Hello World')}")
+    print(f"  Decode 'SGVsbG8gV29ybGQ=': {handle_base64('decode', 'SGVsbG8gV29ybGQ=')}")
+    print(f"  Decode (invalid base64 string '!!!'): {handle_base64('decode', '!!!')}")
+    print("-" * 20 + "\n")
+
+    print("Testing JSON Formatter:")
+    # ... (jsonfmt tests remain the same)
+    valid_json_compact = '{"name": "Whiz-MD", "version": 1.0, "features": ["utility", "fun", {"text": "tools"}], "active": true}'
+    print(f"  Valid compact JSON: {format_json_string(valid_json_compact)}")
+    print("-" * 20 + "\n")
+
+    print("Testing WHOIS Lookup:")
+    # ... (whois tests remain the same, ensuring PYTHON_WHOIS_AVAILABLE check)
+    if PYTHON_WHOIS_AVAILABLE:
+        print(f"  WHOIS for google.com (snippet):\n{fetch_whois_data('google.com')[:200]}...\n")
+    else:
+        print("  python-whois library not available, skipping WHOIS tests.")
+    print("-" * 20 + "\n")
+
+    print("Testing DNS Lookup:")
+    if DNSPYTHON_AVAILABLE:
+        test_dns_queries = [
+            ("google.com", "A"),
+            ("google.com", "AAAA"),
+            ("google.com", "MX"),
+            ("google.com", "TXT"),
+            ("google.com", "NS"),
+            ("www.google.com", "CNAME"), # Might be A/AAAA directly
+            ("gmail.com", "MX"),
+            ("_sip._tcp.google.com", "SRV"), # Example SRV record
+            ("nonexistentdomain123xyz.com", "A"),
+            ("google.com", "PTR"), # PTR usually for IPs
+            ("google.com", "SOA"),
+            ("google.com", "INVALIDTYPE"),
+            ("", "A"), # No domain
+        ]
+        for i, (domain, rtype) in enumerate(test_dns_queries):
+            print(f"--- DNS Test {i+1}: '{domain}' [{rtype}] ---")
+            result = fetch_dns_records(domain, rtype)
+            print(f"{result}\n")
+    else:
+        print("  dnspython library not available, skipping DNS tests.")
+    print("-" * 20 + "\n")

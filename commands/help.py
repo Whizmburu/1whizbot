@@ -38,6 +38,7 @@ COMMANDS_LIST = {
     "/base64 <encode|decode> <string>": "Encodes or decodes a string using Base64.",
     "/jsonfmt <json_string>": "Formats (pretty-prints) a JSON string.",
     "/whois <domain_name>": "Performs a WHOIS lookup for a domain name.",
+    "/dns <domain> [type]": "Performs DNS lookup (A, MX, TXT, NS, CNAME, AAAA, SOA, SRV, PTR).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
