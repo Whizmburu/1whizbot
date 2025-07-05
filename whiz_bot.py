@@ -23,7 +23,7 @@ from commands.report import get_report_message as report_command_handler
 from commands.invite import get_invite_message as invite_command_handler
 from commands.calc import evaluate_expression as calc_command_handler
 from commands.qr import generate_qr_image as qr_command_handler
-from commands.translate import translate_text_command as translate_command_handler
+# from commands.translate import translate_text_command as translate_command_handler # Temporarily commented out due to httpx conflict
 from commands.shorturl import generate_short_url as shorturl_command_handler
 from commands.weather import fetch_weather_data as weather_command_handler
 from commands.time_cmd import get_current_time_for_timezone as time_command_handler
@@ -54,7 +54,8 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
                                      fetch_top_headlines as news_command_handler, \
                                      fetch_npm_package_info as npm_command_handler, \
                                      fetch_movie_details as movie_command_handler, \
-                                     search_jikan_anime as anime_command_handler # Added internet_cmds
+                                     search_jikan_anime as anime_command_handler
+from commands.ai_cmds import get_ai_response as ask_command_handler # Added AI command
 
 
 # Store bot's actual start time for uptime calculation consistency
@@ -135,12 +136,12 @@ def process_command(command_text):
         if len(parts) > 1:
             text_to_encode = parts[1]
         print(qr_command_handler(text_to_encode))
-    elif command_text.lower().startswith("/translate"):
-        parts = command_text.split(maxsplit=1)
-        args_str = ""
-        if len(parts) > 1:
-            args_str = parts[1]
-        print(translate_command_handler(args_str))
+    # elif command_text.lower().startswith("/translate"): # Temporarily commented out
+    #     parts = command_text.split(maxsplit=1)
+    #     args_str = ""
+    #     if len(parts) > 1:
+    #         args_str = parts[1]
+    #     print(translate_command_handler(args_str))
     elif command_text.lower().startswith("/shorturl"):
         parts = command_text.split(maxsplit=1)
         url_to_shorten = ""
@@ -437,6 +438,12 @@ def process_command(command_text):
         if len(parts) > 1:
             anime_query_str = parts[1]
         print(anime_command_handler(anime_query_str))
+    elif command_text.lower().startswith("/ask"):
+        parts = command_text.split(maxsplit=1)
+        prompt_str = None
+        if len(parts) > 1:
+            prompt_str = parts[1]
+        print(ask_command_handler(prompt_str))
     else:
         print(f"Unknown command: {command_text}")
 

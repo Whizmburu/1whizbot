@@ -47,6 +47,7 @@ COMMANDS_LIST = {
     "/npm <package_name>": "Fetches information about an NPM package.",
     "/movie <title>": "Fetches details about a movie from OMDB.",
     "/anime <query>": "Searches for an anime and shows details from MyAnimeList (via Jikan).",
+    "/ask <prompt>": "Asks a question to the AI (OpenAI GPT). Requires API key.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
