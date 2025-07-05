@@ -35,6 +35,8 @@ COMMANDS_LIST = {
     "/tinytext <text>": "Converts text to tiny Unicode (small caps).",
     "/ascii [font] <text>": "Generates ASCII art from text. Fonts: standard, slant, big, etc.",
     "/emoji <keyword>": "Finds emojis related to a keyword (e.g., /emoji happy).",
+    "/base64 <encode|decode> <string>": "Encodes or decodes a string using Base64.",
+    "/jsonfmt <json_string>": "Formats (pretty-prints) a JSON string.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

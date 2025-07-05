@@ -42,7 +42,9 @@ from commands.text_utils_cmds import reverse_text as reverse_command_handler, \
                                      generate_zalgo_text as zalgo_command_handler, \
                                      generate_tiny_text as tinytext_command_handler, \
                                      generate_ascii_art as ascii_command_handler, \
-                                     find_emojis_for_keyword as emoji_command_handler # Added text_utils
+                                     find_emojis_for_keyword as emoji_command_handler
+from commands.dev_tools_cmds import handle_base64 as base64_command_handler, \
+                                     format_json_string as jsonfmt_command_handler # Added dev_tools
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -319,6 +321,21 @@ def process_command(command_text):
         if len(parts) > 1:
             keyword = parts[1]
         print(emoji_command_handler(keyword))
+    elif command_text.lower().startswith("/base64"):
+        parts = command_text.split(maxsplit=2) # /base64 <action> <string>
+        action = None
+        input_str = None
+        if len(parts) > 1:
+            action = parts[1]
+        if len(parts) > 2:
+            input_str = parts[2]
+        print(base64_command_handler(action, input_str))
+    elif command_text.lower().startswith("/jsonfmt"):
+        parts = command_text.split(maxsplit=1)
+        json_str = None
+        if len(parts) > 1:
+            json_str = parts[1] # The rest of the string is the JSON
+        print(jsonfmt_command_handler(json_str))
     else:
         print(f"Unknown command: {command_text}")
 
