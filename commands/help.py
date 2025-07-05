@@ -41,6 +41,8 @@ COMMANDS_LIST = {
     "/dns <domain> [type]": "Performs DNS lookup (A, MX, TXT, NS, CNAME, AAAA, SOA, SRV, PTR).",
     "/wiki <query>": "Searches Wikipedia for a query and returns a summary.",
     "/github <username>": "Fetches profile information for a GitHub user.",
+    "/news [country] [category]": "Fetches top news. E.g., /news us technology. Defaults to US/general.",
+    "/npm <package_name>": "Fetches information about an NPM package.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

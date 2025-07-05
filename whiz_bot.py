@@ -48,7 +48,9 @@ from commands.dev_tools_cmds import handle_base64 as base64_command_handler, \
                                      fetch_whois_data as whois_command_handler, \
                                      fetch_dns_records as dns_command_handler
 from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handler, \
-                                     fetch_github_user_info as github_command_handler # Added internet_cmds
+                                     fetch_github_user_info as github_command_handler, \
+                                     fetch_top_headlines as news_command_handler, \
+                                     fetch_npm_package_info as npm_command_handler # Added internet_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -367,6 +369,49 @@ def process_command(command_text):
         if len(parts) > 1:
             username_gh = parts[1]
         print(github_command_handler(username_gh))
+    elif command_text.lower().startswith("/news"):
+        parts = command_text.split(maxsplit=2) # /news [country] [category]
+        # Example: /news us technology -> parts = ["/news", "us", "technology"]
+        # Example: /news us -> parts = ["/news", "us"] (category default)
+        # Example: /news -> parts = ["/news"] (country and category default)
+
+        country_news = None
+        category_news = None
+
+        args_after_command = parts[1] if len(parts) > 1 else ""
+
+        if args_after_command:
+            arg_parts_news = args_after_command.strip().split(maxsplit=1)
+            # First arg could be country or category if only one is provided.
+            # For simplicity, we'll assume if one arg, it's country. If two, country then category.
+            # A more robust parser would check if arg1 is a valid category if arg2 is missing, etc.
+            if len(arg_parts_news) >= 1:
+                # Check if the first argument is a 2-letter country code (heuristic)
+                # or a common category name. This parsing can be tricky.
+                # Let's assume: /news country category OR /news country OR /news category OR /news
+                # The `fetch_top_headlines` function has defaults.
+                # We can pass up to two arguments, let the handler sort it if it's smart,
+                # or we decide here.
+                # Simple approach: first word is country, second is category.
+                # If only one word, it's country.
+                # This isn't ideal as user might type /news technology (meaning category)
+
+                # Let's try this: first word is country, second is category.
+                # If only one word, it's treated as country by default by the handler.
+                # The handler has defaults for country ("us") and category ("general").
+
+                country_news = arg_parts_news[0]
+                if len(arg_parts_news) > 1:
+                    category_news = arg_parts_news[1]
+
+        # The handler defaults country to "us" and category to "general" if None is passed
+        print(news_command_handler(country=country_news, category=category_news))
+    elif command_text.lower().startswith("/npm"):
+        parts = command_text.split(maxsplit=1)
+        package_name_npm = None
+        if len(parts) > 1:
+            package_name_npm = parts[1]
+        print(npm_command_handler(package_name_npm))
     else:
         print(f"Unknown command: {command_text}")
 
