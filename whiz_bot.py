@@ -55,7 +55,8 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
                                      fetch_npm_package_info as npm_command_handler, \
                                      fetch_movie_details as movie_command_handler, \
                                      search_jikan_anime as anime_command_handler
-from commands.ai_cmds import get_ai_response as ask_command_handler # Added AI command
+from commands.ai_cmds import get_ai_response as ask_command_handler, \
+                               generate_ai_image_from_prompt as imagegen_command_handler # Added AI command
 
 
 # Store bot's actual start time for uptime calculation consistency
@@ -444,6 +445,14 @@ def process_command(command_text):
         if len(parts) > 1:
             prompt_str = parts[1]
         print(ask_command_handler(prompt_str))
+    elif command_text.lower().startswith("/imagegen"):
+        parts = command_text.split(maxsplit=1)
+        image_prompt_str = None
+        if len(parts) > 1:
+            image_prompt_str = parts[1]
+        # For now, using default n, size, model.
+        # These could be parsed from args_str if desired later.
+        print(imagegen_command_handler(image_prompt_str))
     else:
         print(f"Unknown command: {command_text}")
 
