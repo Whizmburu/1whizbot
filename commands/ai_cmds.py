@@ -352,3 +352,153 @@ if __name__ == '__main__':
         print("  Skipping further OpenAI Summarize tests as OPENAI_API_KEY is not set or invalid in .env.\n")
 
     print("-" * 20 + "\n")
+
+# --- AI Code Generation Command ---
+import re # For parsing code blocks from AI response
+
+def extract_code_from_markdown(markdown_text: str) -> str:
+    """
+    Extracts code from a markdown code block (e.g., ```python\ncode\n``` or ```\ncode\n```).
+    Returns the raw code content or the original text if no block is found.
+    """
+    # Regex to find code blocks, possibly with a language specifier
+    # It captures the language (optional) and the code content
+    # Pattern: ```optional_lang\n(code_content)```
+    # Using re.DOTALL so that . matches newlines within the code block
+    code_block_pattern = re.compile(r"```(?:[a-zA-Z0-9_+\-\.#]*)?\s*\n(.*?)\n```", re.DOTALL | re.IGNORECASE)
+
+    match = code_block_pattern.search(markdown_text)
+    if match:
+        return match.group(1).strip() # Return the captured code content
+    else:
+        # If no markdown code block, maybe the AI just returned raw code.
+        # This is a fallback; ideally, the AI is prompted to use markdown.
+        return markdown_text.strip()
+
+def get_ai_code_generation(code_description: str = None, target_language: str = None) -> str:
+    """
+    Generates code using OpenAI's chat completion API based on a description and optional language.
+    """
+    if not OPENAI_AVAILABLE:
+        return "🚫 Error: The 'openai' library is not installed. Cannot use AI code generation."
+
+    api_key = get_env_variable("OPENAI_API_KEY")
+    bot_name = get_env_variable("BOT_NAME", "WHIZ-MD")
+
+    if not api_key or not api_key.startswith("sk-"):
+        return f"🚫 Error: OpenAI API key is not configured or invalid for {bot_name}.\n" \
+               f"Please set a valid OPENAI_API_KEY (starting with 'sk-') in the .env file."
+
+    if not code_description or not code_description.strip():
+        return "💻 Please provide a description of the code you want to generate. Usage: /codegen [language] <description>"
+
+    system_prompt = (
+        "You are an expert code generation AI assistant. Generate a functional and concise code snippet "
+        "based on the user's request. Prioritize correctness and readability. "
+        "ONLY output the code block itself, formatted in a markdown code block. "
+        "Do not include any explanatory text, introductions, or conclusions unless explicitly part of the code (e.g., comments)."
+    )
+
+    user_query = code_description.strip()
+    if target_language and target_language.strip():
+        user_query = f"Language: {target_language.strip()}\nTask: {user_query}"
+    else:
+        user_query = f"Task: {user_query}\n(If no language is specified in the task, please choose a common and appropriate language like Python, JavaScript, or based on context if provided.)"
+
+    try:
+        client = OpenAI()
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo", # Or "gpt-4" for potentially better code, but higher cost
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            max_tokens=1000,  # Allow more tokens for code
+            temperature=0.3   # Lower temperature for more deterministic and less "creative" code
+        )
+
+        raw_ai_reply = chat_completion.choices[0].message.content
+
+        if not raw_ai_reply or not raw_ai_reply.strip():
+            return "🤔 The AI tried but couldn't generate code for that request. Please try rephrasing or be more specific."
+
+        # Extract code from markdown block if present
+        generated_code = extract_code_from_markdown(raw_ai_reply)
+
+        # Determine language for markdown block, default to 'plaintext' or inferred
+        lang_for_markdown = target_language.strip().lower() if target_language and target_language.strip() else "plaintext"
+        # A more advanced version could try to infer language from the generated code if not specified.
+
+        return f"💻 **Generated Code ({lang_for_markdown if target_language else 'auto-detected language'}):**\n" \
+               f"```{(lang_for_markdown if target_language else '')}\n{generated_code}\n```"
+
+    except AuthenticationError:
+        return "🚫 Error: OpenAI API Key is invalid or has insufficient permissions. Please check your key."
+    except RateLimitError:
+        return "🚫 Error: OpenAI API rate limit exceeded for code generation. Please try again later."
+    except APIError as e:
+        error_detail = str(e)
+        if "Your request was rejected as a result of our safety system" in error_detail: # Content policy
+            return "🚫 Error: Your code generation request was rejected by the AI's safety system. Please modify your prompt."
+        # print(f"OpenAI Codegen APIError: {e}")
+        return f"🚫 Error: An issue occurred with the OpenAI API during code generation. (Status: {e.status_code if hasattr(e, 'status_code') else 'N/A'}, Message: {e.message if hasattr(e, 'message') else error_detail})"
+    except Exception as e:
+        # print(f"Codegen command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while generating code. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing AI Commands ---\n")
+
+    # ... (previous AI command tests remain the same) ...
+    print("Testing AI Ask Command (/ask):")
+    original_openai_key = get_env_variable("OPENAI_API_KEY")
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Ask 'What is 2+2?': (result snippet)\n{get_ai_response('What is 2+2?')[:100]}...\n")
+    else:
+        print("  Skipping /ask test as OPENAI_API_KEY is not set or invalid in .env.\n")
+    # print("-" * 20 + "\n") # Already printed by ask test
+
+    print("Testing AI Image Generation Command (/imagegen):")
+    if original_openai_key and original_openai_key.startswith("sk-"):
+         print(f"  Imagegen 'A red apple on a table' (result snippet):\n{generate_ai_image_from_prompt('A red apple on a table', size='256x256')[:150]}...\n")
+    else:
+        print("  Skipping /imagegen test as OPENAI_API_KEY is not set or invalid in .env.\n")
+    # print("-" * 20 + "\n") # Already printed by imagegen test
+
+    print("Testing AI Summarize Command (/summarize):")
+    sample_text_short_for_test = "The quick brown fox jumps over the lazy dog."
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Summary for short text (medium):\n{get_ai_summary(sample_text_short_for_test, length_option='medium')}\n")
+    else:
+        print("  Skipping /summarize test as OPENAI_API_KEY is not set or invalid in .env.\n")
+    # print("-" * 20 + "\n") # Already printed by summarize test
+
+    print("Testing AI Code Generation Command (/codegen):")
+    print("  --- Test Case 1: OpenAI API Key Missing/Invalid (simulated for codegen) ---")
+    current_key_for_codegen_test = os.environ.get("OPENAI_API_KEY")
+    os.environ["OPENAI_API_KEY"] = "INVALID_KEY_NO_SK_PREFIX_CODEGEN"
+    print(f"  Output (invalid key format): {get_ai_code_generation('python function to add two numbers')}\n")
+    if current_key_for_codegen_test is not None:
+         os.environ["OPENAI_API_KEY"] = current_key_for_codegen_test
+    else:
+        if "OPENAI_API_KEY" in os.environ and os.environ["OPENAI_API_KEY"] == "INVALID_KEY_NO_SK_PREFIX_CODEGEN":
+            del os.environ["OPENAI_API_KEY"]
+
+    print("  --- Test Case 2: No Description ---")
+    print(f"  Output (no description): {get_ai_code_generation('')}\n")
+
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print("  --- Test Case 3: Python function (requires valid API key) ---")
+        print(f"  Prompt 'python function to find factorial':\n{get_ai_code_generation('python function to find factorial')}\n")
+
+        print("  --- Test Case 4: JavaScript with specified language ---")
+        print(f"  Prompt 'javascript code to log hello to console':\n{get_ai_code_generation('code to log hello to console', target_language='javascript')}\n")
+
+        print("  --- Test Case 5: HTML structure ---")
+        print(f"  Prompt 'basic html page with a title and paragraph':\n{get_ai_code_generation('basic html page with a title Hello and paragraph This is a test.', target_language='html')}\n")
+    else:
+        print("  Skipping further OpenAI Code Generation tests as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("-" * 20 + "\n")

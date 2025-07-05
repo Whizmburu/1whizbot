@@ -57,7 +57,8 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
                                      search_jikan_anime as anime_command_handler
 from commands.ai_cmds import get_ai_response as ask_command_handler, \
                                generate_ai_image_from_prompt as imagegen_command_handler, \
-                               get_ai_summary as summarize_command_handler # Added AI command
+                               get_ai_summary as summarize_command_handler, \
+                               get_ai_code_generation as codegen_command_handler # Added AI command
 
 
 # Store bot's actual start time for uptime calculation consistency
@@ -475,6 +476,26 @@ def process_command(command_text):
                 text_to_summarize = args_str_summarize
 
         print(summarize_command_handler(text_to_summarize, length_option))
+    elif command_text.lower().startswith("/codegen"):
+        parts = command_text.split(maxsplit=1) # /codegen [lang] <desc>
+        args_str_codegen = None
+        if len(parts) > 1:
+            args_str_codegen = parts[1]
+
+        target_lang_codegen = None
+        code_desc_codegen = None
+
+        if args_str_codegen:
+            arg_parts_codegen = args_str_codegen.strip().split(maxsplit=1)
+            # Simple check: if first word is short (<=10 chars, no spaces) and there's a second part, assume it's a language.
+            # This is a heuristic. A list of common languages could be used for better checking.
+            if len(arg_parts_codegen) > 1 and len(arg_parts_codegen[0]) <= 10 and not " " in arg_parts_codegen[0]:
+                target_lang_codegen = arg_parts_codegen[0]
+                code_desc_codegen = arg_parts_codegen[1]
+            else: # Assume all of it is description
+                code_desc_codegen = args_str_codegen
+
+        print(codegen_command_handler(code_desc_codegen, target_lang_codegen))
     else:
         print(f"Unknown command: {command_text}")
 
