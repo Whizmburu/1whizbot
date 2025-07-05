@@ -39,6 +39,8 @@ COMMANDS_LIST = {
     "/jsonfmt <json_string>": "Formats (pretty-prints) a JSON string.",
     "/whois <domain_name>": "Performs a WHOIS lookup for a domain name.",
     "/dns <domain> [type]": "Performs DNS lookup (A, MX, TXT, NS, CNAME, AAAA, SOA, SRV, PTR).",
+    "/wiki <query>": "Searches Wikipedia for a query and returns a summary.",
+    "/github <username>": "Fetches profile information for a GitHub user.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
