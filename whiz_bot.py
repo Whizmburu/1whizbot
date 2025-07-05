@@ -36,7 +36,9 @@ from commands.fun_cmds import coin_flip as coinflip_command_handler, \
                                get_truth_question as truth_command_handler, \
                                get_dare_challenge as dare_command_handler, \
                                calculate_ship_percentage as ship_command_handler, \
-                               guess_the_number as guess_command_handler
+                               guess_the_number as guess_command_handler, \
+                               fetch_random_joke as joke_command_handler, \
+                               fetch_random_meme as meme_command_handler # Added to fun_cmds
 from commands.text_utils_cmds import reverse_text as reverse_command_handler, \
                                      generate_fancy_text as fancy_command_handler, \
                                      generate_zalgo_text as zalgo_command_handler, \
@@ -53,6 +55,7 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
                                      fetch_npm_package_info as npm_command_handler, \
                                      fetch_movie_details as movie_command_handler, \
                                      search_jikan_anime as anime_command_handler # Added internet_cmds
+
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -220,6 +223,14 @@ def process_command(command_text):
         if len(parts) > 1:
             user_guess = parts[1]
         print(guess_command_handler(user_guess))
+    elif command_text.lower() == "/joke": # /joke doesn't take arguments
+        print(joke_command_handler())
+    elif command_text.lower().startswith("/meme"):
+        parts = command_text.split(maxsplit=1)
+        subreddit_meme = None
+        if len(parts) > 1:
+            subreddit_meme = parts[1] # Optional subreddit
+        print(meme_command_handler(subreddit_meme))
     elif command_text.lower().startswith("/reverse"):
         parts = command_text.split(maxsplit=1)
         text_to_reverse = None

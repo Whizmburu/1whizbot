@@ -350,3 +350,195 @@ if __name__ == '__main__':
         guess_val = random.randint(GUESS_NUMBER_MIN, GUESS_NUMBER_MAX)
         print(f"  Guessing {guess_val}: {guess_the_number(str(guess_val))}")
     print("-" * 20 + "\n")
+
+# --- Joke Command ---
+JOKE_API_URL = "https://official-joke-api.appspot.com/random_joke"
+# Alternative: https://v2.jokeapi.dev/joke/Any?type=single or ?type=twopart (more complex parsing)
+
+def fetch_random_joke() -> str:
+    """
+    Fetches a random joke (setup and punchline) from official-joke-api.
+    """
+    import requests # Already a dependency from other commands, but good to note
+    try:
+        response = requests.get(JOKE_API_URL, timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+
+        setup = data.get("setup")
+        punchline = data.get("punchline")
+
+        if not setup or not punchline:
+            return "🚫 Error: Could not parse joke from API response."
+
+        return f"🃏 **Here's a joke for you:**\n\n" \
+               f"   {setup}\n\n" \
+               f"   🥁 ... {punchline} 😂"
+
+    except requests.exceptions.RequestException as req_err:
+        # print(f"Joke API Request error: {req_err}")
+        return "🚫 Error: Could not connect to the joke service. Please try again later."
+    except Exception as e:
+        # print(f"Joke command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while fetching a joke. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Fun Commands ---\n")
+
+    # ... (previous fun command tests remain the same) ...
+    print("Testing Coinflip:")
+    for _ in range(5): print(f"  {coin_flip()}")
+    print("-" * 20 + "\n")
+
+    print("Testing Magic 8-Ball:")
+    print(f"  No question: {magic_8_ball()}")
+    print(f"  Question 1: {magic_8_ball('Will it rain today?')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Rate Command:")
+    print(f"  No item: {rate_something()}")
+    print(f"  Item 'my cooking': {rate_something('my cooking')}")
+    print("-" * 20 + "\n")
+
+    print("Testing RPS Command:")
+    print(f"  User picks Rock: {play_rps('rock')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Truth Command:")
+    print(f"  {get_truth_question()}")
+    print("-" * 20 + "\n")
+
+    print("Testing Dare Command:")
+    print(f"  {get_dare_challenge()}")
+    print("-" * 20 + "\n")
+
+    print("Testing Ship Command:")
+    print(f"  Two names (Alice, Bob): {calculate_ship_percentage('Alice', 'Bob')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Guess Command:")
+    print(f"  Guessing 5: {guess_the_number('5')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Joke Command:")
+    for _ in range(2): # Fetch a couple of jokes
+        print(f"  {fetch_random_joke()}\n")
+    print("-" * 20 + "\n")
+
+# --- Meme Command ---
+MEME_API_BASE_URL = "https://meme-api.com/gimme"
+
+def fetch_random_meme(subreddit: str = None) -> str:
+    """
+    Fetches a random meme, optionally from a specific subreddit.
+    Returns a string with the meme's title, image URL, and post link.
+    """
+    import requests # Ensure requests is imported if not already at module top
+
+    url = MEME_API_BASE_URL
+    if subreddit and subreddit.strip():
+        url = f"{MEME_API_BASE_URL}/{subreddit.strip()}"
+
+    try:
+        response = requests.get(url, timeout=10)
+        # meme-api often returns 200 even if subreddit is invalid but gives a default meme
+        # It might return other codes for actual errors.
+        if response.status_code == 404 and subreddit: # Subreddit not found by API structure
+             return f"😕 Subreddit '{subreddit}' not found or no memes available there. Try a different one or use /meme for a random one."
+
+        response.raise_for_status() # For other errors like 5xx or actual 404 on base URL
+
+        data = response.json()
+
+        if not data or not isinstance(data, dict):
+            return "🚫 Error: Received unexpected data format from meme API."
+
+        # Check for API specific error messages if any (meme-api.com structure)
+        # For example, if a subreddit has no image posts, it might return a specific error or just fewer fields.
+        # The 'url' field is critical for the image.
+        img_url = data.get('url')
+        if not img_url:
+            # This might happen if the API returns data but no image URL (e.g. text post from subreddit)
+            if subreddit:
+                 return f"😕 Could not find an image meme in subreddit '{subreddit}'. Try again or a different subreddit."
+            return "🚫 Error: Meme API did not return an image URL."
+
+        title = data.get('title', 'No Title')
+        post_link = data.get('postLink', '#')
+        # Optional: author, ups, nsfw, spoiler fields are also available
+        # For now, just title, image url, and post link.
+
+        # In a real bot, you'd send the image. Here we just link to it.
+        return f"🤣 **{title}**\n\n" \
+               f"🖼️ Image: {img_url}\n" \
+               f"🔗 Post: {post_link}\n\n" \
+               f"(If the image doesn't load, try the post link!)"
+
+    except requests.exceptions.HTTPError as http_err:
+        # print(f"Meme API HTTP error: {http_err} - {response.text}")
+        if response.status_code == 403: # Forbidden, e.g. if API changes or IP ban
+             return "🚫 Error: Access to meme API was forbidden."
+        elif response.status_code == 404: # Should be caught above, but as a general fallback
+             return f"😕 Meme source not found (API Error {response.status_code})."
+        return f"🚫 Error: Could not fetch a meme. HTTP {response.status_code}."
+    except requests.exceptions.RequestException as req_err:
+        # print(f"Meme API Request error: {req_err}")
+        return "🚫 Error: Could not connect to the meme service. Please try again later."
+    except Exception as e:
+        # print(f"Meme command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while fetching a meme. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Fun Commands ---\n")
+
+    # ... (previous fun command tests remain the same) ...
+    print("Testing Coinflip:")
+    for _ in range(1): print(f"  {coin_flip()}") # Shortened for brevity
+    print("-" * 20 + "\n")
+    print("Testing Magic 8-Ball:")
+    print(f"  {magic_8_ball('Will it rain today?')}")
+    print("-" * 20 + "\n")
+    print("Testing Rate Command:")
+    print(f"  {rate_something('this bot')}")
+    print("-" * 20 + "\n")
+    print("Testing RPS Command:")
+    print(f"  {play_rps('rock')}")
+    print("-" * 20 + "\n")
+    print("Testing Truth Command:")
+    print(f"  {get_truth_question()}")
+    print("-" * 20 + "\n")
+    print("Testing Dare Command:")
+    print(f"  {get_dare_challenge()}")
+    print("-" * 20 + "\n")
+    print("Testing Ship Command:")
+    print(f"  {calculate_ship_percentage('Alice', 'Bob')}")
+    print("-" * 20 + "\n")
+    print("Testing Guess Command:")
+    print(f"  {guess_the_number('5')}")
+    print("-" * 20 + "\n")
+    print("Testing Joke Command:")
+    print(f"  {fetch_random_joke()}\n")
+    print("-" * 20 + "\n")
+
+    print("Testing Meme Command:")
+    print("  Fetching random meme (no subreddit):")
+    print(f"  {fetch_random_meme()}\n")
+
+    print("  Fetching meme from 'wholesomememes':")
+    print(f"  {fetch_random_meme('wholesomememes')}\n")
+
+    print("  Fetching meme from 'dankmemes' (might be NSFW, API should filter or flag):")
+    print(f"  {fetch_random_meme('dankmemes')}\n")
+
+    print("  Fetching meme from non-existent subreddit 'nonexistentsub12345':")
+    # The API meme-api.com/gimme/nonexistentsub12345 often returns a random meme anyway if sub not found,
+    # rather than a 404, unless the API behavior has changed.
+    # The code tries to handle 404 specifically if API does that.
+    print(f"  {fetch_random_meme('nonexistentsub12345')}\n")
+
+    print("  No subreddit argument (should use random):")
+    print(f"  {fetch_random_meme(None)}\n")
+    print("-" * 20 + "\n")

@@ -29,6 +29,8 @@ COMMANDS_LIST = {
     "/dare": "Gives you a random dare challenge.",
     "/ship <name1> [name2]": "Calculates love compatibility between names.",
     "/guess <number>": "Guess a number (1-10). Bot tells you if you're right!",
+    "/joke": "Tells a random joke.",
+    "/meme [subreddit]": "Fetches a random meme, optionally from a specific subreddit.",
     "/reverse <text>": "Reverses the provided text.",
     "/fancy [style] <text>": "Converts text to fancy Unicode. Styles: bold_serif, script, fraktur, cursive.",
     "/zalgo [intensity] <text>": "Converts text to Zalgo (glitch) text. Intensities: low, normal, high, max.",
