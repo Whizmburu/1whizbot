@@ -365,3 +365,267 @@ if __name__ == '__main__':
         result_npm = fetch_npm_package_info(pkg_name)
         print(f"{result_npm}\n")
     print("-" * 20 + "\n")
+
+# --- Movie Info Command (OMDB API) ---
+OMDB_API_URL = "http://www.omdbapi.com/"
+
+def fetch_movie_details(movie_title: str = None) -> str:
+    """
+    Fetches details for a given movie title using OMDB API.
+    """
+    from utils.env_loader import get_env_variable # Delayed import
+
+    api_key = get_env_variable("OMDB_API_KEY")
+    bot_name = get_env_variable("BOT_NAME", "WHIZ-MD")
+
+    if not api_key or api_key.strip() == "":
+        return f"🚫 Error: OMDB API key is not configured for {bot_name}.\n" \
+               f"Please set OMDB_API_KEY in the .env file. Get one from http://www.omdbapi.com/apikey.aspx"
+
+    if not movie_title or not movie_title.strip():
+        return "🎬 Please provide a movie title to search. Usage: /movie <title>"
+
+    params = {
+        't': movie_title.strip(),
+        'apikey': api_key,
+        'plot': 'short' # Or 'full'
+    }
+
+    try:
+        response = requests.get(OMDB_API_URL, params=params, timeout=10)
+        response.raise_for_status() # Raises HTTPError for bad responses like 5xx
+
+        data = response.json()
+
+        if data.get("Response") == "False":
+            error_message = data.get("Error", "Movie not found or API error.")
+            if "Movie not found!" in error_message:
+                 return f"😕 Movie '{movie_title}' not found. Please check the title."
+            return f"🚫 Error from OMDB API: {error_message}"
+
+        # Extracting key information
+        title = data.get('Title', 'N/A')
+        year = data.get('Year', 'N/A')
+        rated = data.get('Rated', 'N/A')
+        released = data.get('Released', 'N/A')
+        runtime = data.get('Runtime', 'N/A')
+        genre = data.get('Genre', 'N/A')
+        director = data.get('Director', 'N/A')
+        writer = data.get('Writer', 'N/A')
+        actors = data.get('Actors', 'N/A')
+        plot = data.get('Plot', 'N/A')
+        language = data.get('Language', 'N/A')
+        country = data.get('Country', 'N/A')
+        awards = data.get('Awards', 'N/A')
+        imdb_rating = data.get('imdbRating', 'N/A')
+        metascore = data.get('Metascore', 'N/A')
+        poster_url = data.get('Poster', '') # For potential future image display
+
+        info = f"""
+        🎬 **{title} ({year})**
+        -----------------------------------
+        Rated: {rated} | Runtime: {runtime} | Released: {released}
+        Genre: {genre}
+        Director: {director}
+        Writer(s): {writer}
+        Actors: {actors}
+        Language: {language} | Country: {country}
+        -----------------------------------
+        **Plot:** {plot}
+        -----------------------------------
+        🏆 Awards: {awards}
+        ⭐ IMDb Rating: {imdb_rating}/10
+        Ⓜ️ Metascore: {metascore}/100
+        """
+        # Poster: {poster_url} (Could be sent as image)
+
+        return "\n".join([line.strip() for line in info.strip().split('\n')])
+
+    except requests.exceptions.HTTPError as http_err:
+        # print(f"OMDB API HTTP error: {http_err} - {response.text}")
+        if response.status_code == 401: # Unauthorized (invalid API key)
+             return "🚫 Error: Invalid OMDB API key. Please check .env configuration."
+        return f"🚫 Error: Could not fetch movie details. HTTP {response.status_code}."
+    except requests.exceptions.RequestException as req_err:
+        # print(f"OMDB API Request error: {req_err}")
+        return "🚫 Error: Network problem or could not connect to the movie database service."
+    except Exception as e:
+        # print(f"Movie command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while fetching movie details. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Internet Commands ---\n")
+
+    # ... (previous tests for wiki, github, news remain the same) ...
+    print("Testing Wikipedia Search:")
+    if WIKIPEDIA_AVAILABLE:
+        print(f"  Wiki for 'Python programming language' (snippet):\n{fetch_wikipedia_summary('Python programming language')[:100]}...\n")
+    else:
+        print("  Wikipedia library not available, skipping tests.")
+    print("-" * 20 + "\n")
+
+    print("Testing GitHub User Info:")
+    print(f"  GitHub for 'octocat':\n{fetch_github_user_info('octocat')[:100]}...\n")
+    print("-" * 20 + "\n")
+
+    from utils.env_loader import get_env_variable # For __main__ test section
+    print("Testing News Headlines:")
+    if get_env_variable("NEWSAPI_ORG_API_KEY"):
+        print(f"  News (default snippet):\n{fetch_top_headlines(count=1)}\n")
+    else:
+        print("  NEWSAPI_ORG_API_KEY not set, skipping NewsAPI tests in __main__.\n")
+    print("-" * 20 + "\n")
+
+    print("Testing NPM Package Info:")
+    print(f"  NPM for 'react' (snippet):\n{fetch_npm_package_info('react')[:100]}...\n")
+    print("-" * 20 + "\n")
+
+    print("Testing Movie Info:")
+    original_omdb_key = get_env_variable("OMDB_API_KEY")
+    print("  --- Test Case 1: OMDB API Key Missing (simulated) ---")
+    if original_omdb_key:
+        import os
+        del os.environ["OMDB_API_KEY"]
+    print(f"  Output (no key): {fetch_movie_details('Inception')}\n")
+    if original_omdb_key:
+        os.environ["OMDB_API_KEY"] = original_omdb_key # Restore
+
+    if original_omdb_key:
+        print("  --- Test Case 2: Valid Movie Title ('Inception') ---")
+        print(f"  Output: {fetch_movie_details('Inception')}\n")
+
+        print("  --- Test Case 3: Movie Not Found ('NonExistentMovieTitle123') ---")
+        print(f"  Output: {fetch_movie_details('NonExistentMovieTitle123')}\n")
+
+        print("  --- Test Case 4: No Movie Title ---")
+        print(f"  Output: {fetch_movie_details('')}\n")
+    else:
+        print("  Skipping further OMDB tests as OMDB_API_KEY is not set in .env.\n")
+    print("-" * 20 + "\n")
+
+# --- Anime Search Command (Jikan API) ---
+JIKAN_API_URL = "https://api.jikan.moe/v4/anime"
+
+def search_jikan_anime(anime_query: str = None, limit: int = 1) -> str:
+    """
+    Searches for anime information using the Jikan API (MyAnimeList).
+    Fetches the first result.
+    """
+    if not anime_query or not anime_query.strip():
+        return "🌸 Please provide an anime title or query to search. Usage: /anime <query>"
+
+    params = {
+        'q': anime_query.strip(),
+        'limit': limit,
+        # 'sfw': True # Optionally filter for SFW results if desired by default
+    }
+
+    try:
+        response = requests.get(JIKAN_API_URL, params=params, timeout=15) # Jikan can sometimes be slower
+        response.raise_for_status() # Raises HTTPError for bad responses
+
+        data = response.json()
+
+        results = data.get("data", [])
+        if not results or not isinstance(results, list) or len(results) == 0:
+            return f"😕 No anime found matching '{anime_query}'. Please try a different query."
+
+        anime_data = results[0] # Get the first result
+
+        title = anime_data.get('title', 'N/A')
+        title_english = anime_data.get('title_english', title) # Fallback to main title
+        title_japanese = anime_data.get('title_japanese', 'N/A')
+
+        anime_type = anime_data.get('type', 'N/A')
+        episodes = anime_data.get('episodes', 'N/A')
+        status = anime_data.get('status', 'N/A')
+        score = anime_data.get('score', 'N/A')
+        rating = anime_data.get('rating', 'N/A') # Age rating like PG-13
+
+        synopsis_raw = anime_data.get('synopsis', 'No synopsis available.')
+        # Shorten synopsis if too long
+        max_synopsis_len = 250
+        synopsis = (synopsis_raw[:max_synopsis_len] + '...') if synopsis_raw and len(synopsis_raw) > max_synopsis_len else synopsis_raw
+
+        url = anime_data.get('url', 'N/A')
+        image_url = anime_data.get('images', {}).get('jpg', {}).get('image_url', '') # For future image display
+
+        info = f"""
+        🌸 **{title_english if title_english else title}** ({title_japanese}) 🌸
+        -----------------------------------
+        Type: {anime_type} | Episodes: {episodes} | Status: {status}
+        ⭐ Score: {score}/10 | Rating: {rating}
+        -----------------------------------
+        **Synopsis:**
+        {synopsis}
+        -----------------------------------
+        🔗 More Info: {url}
+        """
+        # Image: {image_url} (Could be sent as image)
+
+        return "\n".join([line.strip() for line in info.strip().split('\n')])
+
+    except requests.exceptions.HTTPError as http_err:
+        # print(f"Jikan API HTTP error: {http_err} - {response.text}")
+        # Jikan API might return 429 for rate limiting if hit too often
+        if response.status_code == 404: # Should be caught by no results, but as a fallback
+             return f"😕 No anime found for '{anime_query}' (API 404)."
+        elif response.status_code == 429:
+             return "🚫 Error: Jikan API rate limit hit. Please try again in a moment."
+        return f"🚫 Error: Could not fetch anime data from Jikan API. HTTP {response.status_code}."
+    except requests.exceptions.RequestException as req_err:
+        # print(f"Jikan API Request error: {req_err}")
+        return "🚫 Error: Network problem or could not connect to the Jikan API service."
+    except Exception as e:
+        # print(f"Anime command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while searching for anime. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing Internet Commands ---\n")
+
+    # ... (previous tests for wiki, github, news, npm, movie remain the same) ...
+    print("Testing Wikipedia Search:")
+    if WIKIPEDIA_AVAILABLE:
+        print(f"  Wiki for 'Python programming language' (snippet):\n{fetch_wikipedia_summary('Python programming language')[:100]}...\n")
+    else:
+        print("  Wikipedia library not available, skipping tests.")
+    print("-" * 20 + "\n")
+
+    print("Testing GitHub User Info:")
+    print(f"  GitHub for 'octocat':\n{fetch_github_user_info('octocat')[:100]}...\n")
+    print("-" * 20 + "\n")
+
+    from utils.env_loader import get_env_variable # For __main__ test section
+    print("Testing News Headlines:")
+    if get_env_variable("NEWSAPI_ORG_API_KEY"):
+        print(f"  News (default snippet):\n{fetch_top_headlines(count=1)}\n")
+    else:
+        print("  NEWSAPI_ORG_API_KEY not set, skipping NewsAPI tests in __main__.\n")
+    print("-" * 20 + "\n")
+
+    print("Testing NPM Package Info:")
+    print(f"  NPM for 'react' (snippet):\n{fetch_npm_package_info('react')[:100]}...\n")
+    print("-" * 20 + "\n")
+
+    print("Testing Movie Info:")
+    if get_env_variable("OMDB_API_KEY"):
+        print(f"  Movie 'Inception' (snippet):\n{fetch_movie_details('Inception')[:150]}...\n")
+    else:
+        print("  OMDB_API_KEY not set, skipping Movie tests in __main__.\n")
+    print("-" * 20 + "\n")
+
+    print("Testing Anime Search (Jikan API):")
+    test_anime_queries = [
+        "Naruto",
+        "Attack on Titan",
+        "Your Name", # Movie
+        "NonExistentAnimeTitle123XYZ", # Should not exist
+        "", # Empty query
+    ]
+    for i, query in enumerate(test_anime_queries):
+        print(f"--- Anime Test {i+1}: '{query}' ---")
+        result_anime = search_jikan_anime(query)
+        print(f"{result_anime}\n")
+    print("-" * 20 + "\n")

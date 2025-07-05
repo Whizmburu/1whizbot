@@ -43,6 +43,8 @@ COMMANDS_LIST = {
     "/github <username>": "Fetches profile information for a GitHub user.",
     "/news [country] [category]": "Fetches top news. E.g., /news us technology. Defaults to US/general.",
     "/npm <package_name>": "Fetches information about an NPM package.",
+    "/movie <title>": "Fetches details about a movie from OMDB.",
+    "/anime <query>": "Searches for an anime and shows details from MyAnimeList (via Jikan).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

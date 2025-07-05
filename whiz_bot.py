@@ -50,7 +50,9 @@ from commands.dev_tools_cmds import handle_base64 as base64_command_handler, \
 from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handler, \
                                      fetch_github_user_info as github_command_handler, \
                                      fetch_top_headlines as news_command_handler, \
-                                     fetch_npm_package_info as npm_command_handler # Added internet_cmds
+                                     fetch_npm_package_info as npm_command_handler, \
+                                     fetch_movie_details as movie_command_handler, \
+                                     search_jikan_anime as anime_command_handler # Added internet_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -412,6 +414,18 @@ def process_command(command_text):
         if len(parts) > 1:
             package_name_npm = parts[1]
         print(npm_command_handler(package_name_npm))
+    elif command_text.lower().startswith("/movie"):
+        parts = command_text.split(maxsplit=1)
+        movie_title_query = None
+        if len(parts) > 1:
+            movie_title_query = parts[1]
+        print(movie_command_handler(movie_title_query))
+    elif command_text.lower().startswith("/anime"):
+        parts = command_text.split(maxsplit=1)
+        anime_query_str = None
+        if len(parts) > 1:
+            anime_query_str = parts[1]
+        print(anime_command_handler(anime_query_str))
     else:
         print(f"Unknown command: {command_text}")
 
