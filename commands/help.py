@@ -61,6 +61,9 @@ COMMANDS_LIST = {
     "/mute <user> [duration]": "Mutes a user in the group (placeholder). E.g. /mute @user 1h",
     "/warn <user> [reason]": "Warns a user in the group (placeholder).",
     "/unban <user>": "Unbans a user from the group (placeholder).",
+    "/groupinfo": "Displays information about the current group (placeholder).",
+    "/antilink [on|off]": "Toggles anti-link feature for the group (placeholder).",
+    "/lockgroup [on|off]": "Toggles group lock (admin-only messages) (placeholder).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

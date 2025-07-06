@@ -68,7 +68,10 @@ from commands.group_admin_cmds import ban_user_placeholder as ban_command_handle
                                       demote_user_placeholder as demote_command_handler, \
                                       mute_user_placeholder as mute_command_handler, \
                                       warn_user_placeholder as warn_command_handler, \
-                                      unban_user_placeholder as unban_command_handler # Added group_admin
+                                      unban_user_placeholder as unban_command_handler, \
+                                      get_groupinfo_placeholder as groupinfo_command_handler, \
+                                      toggle_antilink_placeholder as antilink_command_handler, \
+                                      toggle_lockgroup_placeholder as lockgroup_command_handler # Added group_admin
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -633,6 +636,20 @@ def process_command(command_text):
         if len(parts) > 1:
             user_to_unban = parts[1].strip() # Unban takes only one arg (user)
         print(unban_command_handler(user_to_unban))
+    elif command_text.lower() == "/groupinfo": # No arguments needed for groupinfo
+        print(groupinfo_command_handler())
+    elif command_text.lower().startswith("/antilink"):
+        parts = command_text.split(maxsplit=1)
+        toggle_value_antilink = None
+        if len(parts) > 1:
+            toggle_value_antilink = parts[1].strip()
+        print(antilink_command_handler(toggle_value_antilink))
+    elif command_text.lower().startswith("/lockgroup"):
+        parts = command_text.split(maxsplit=1)
+        toggle_value_lockgroup = None
+        if len(parts) > 1:
+            toggle_value_lockgroup = parts[1].strip()
+        print(lockgroup_command_handler(toggle_value_lockgroup))
     else:
         print(f"Unknown command: {command_text}")
 
