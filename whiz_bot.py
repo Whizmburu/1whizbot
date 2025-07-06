@@ -61,7 +61,11 @@ from commands.ai_cmds import get_ai_response as ask_command_handler, \
                                get_ai_code_generation as codegen_command_handler, \
                                get_ai_chat_response as chat_command_handler
 from commands.timing_cmds import start_blocking_timer as timer_command_handler, \
-                                 set_reminder_placeholder as reminder_command_handler # Added timing
+                                 set_reminder_placeholder as reminder_command_handler
+from commands.group_admin_cmds import ban_user_placeholder as ban_command_handler, \
+                                      kick_user_placeholder as kick_command_handler, \
+                                      promote_user_placeholder as promote_command_handler, \
+                                      demote_user_placeholder as demote_command_handler # Added group_admin
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -560,6 +564,42 @@ def process_command(command_text):
 
 
         print(reminder_command_handler(time_spec_str_reminder, reminder_message_text))
+    elif command_text.lower().startswith("/ban"):
+        # /ban <user_id> [reason]
+        parts = command_text.split(maxsplit=1) # Separate command from args
+        user_to_ban = None
+        reason_for_ban = None
+        if len(parts) > 1:
+            args_ban = parts[1].strip().split(maxsplit=1) # Split args into user_id and reason
+            if len(args_ban) >= 1:
+                user_to_ban = args_ban[0]
+            if len(args_ban) > 1:
+                reason_for_ban = args_ban[1]
+        print(ban_command_handler(user_to_ban, reason_for_ban))
+    elif command_text.lower().startswith("/kick"):
+        # /kick <user_id> [reason]
+        parts = command_text.split(maxsplit=1)
+        user_to_kick = None
+        reason_for_kick = None
+        if len(parts) > 1:
+            args_kick = parts[1].strip().split(maxsplit=1)
+            if len(args_kick) >= 1:
+                user_to_kick = args_kick[0]
+            if len(args_kick) > 1:
+                reason_for_kick = args_kick[1]
+        print(kick_command_handler(user_to_kick, reason_for_kick))
+    elif command_text.lower().startswith("/promote"):
+        parts = command_text.split(maxsplit=1)
+        user_to_promote = None
+        if len(parts) > 1:
+            user_to_promote = parts[1].strip() # Promote takes only one arg (user)
+        print(promote_command_handler(user_to_promote))
+    elif command_text.lower().startswith("/demote"):
+        parts = command_text.split(maxsplit=1)
+        user_to_demote = None
+        if len(parts) > 1:
+            user_to_demote = parts[1].strip() # Demote takes only one arg (user)
+        print(demote_command_handler(user_to_demote))
     else:
         print(f"Unknown command: {command_text}")
 
