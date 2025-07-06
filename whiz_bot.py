@@ -59,8 +59,9 @@ from commands.ai_cmds import get_ai_response as ask_command_handler, \
                                generate_ai_image_from_prompt as imagegen_command_handler, \
                                get_ai_summary as summarize_command_handler, \
                                get_ai_code_generation as codegen_command_handler, \
-                               get_ai_chat_response as chat_command_handler # Added AI command
-
+                               get_ai_chat_response as chat_command_handler
+from commands.timing_cmds import start_blocking_timer as timer_command_handler, \
+                                 set_reminder_placeholder as reminder_command_handler # Added timing
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -158,6 +159,18 @@ def process_command(command_text):
         if len(parts) > 1:
             location_query = parts[1]
         print(weather_command_handler(location_query))
+    elif command_text.lower().startswith("/timer"): # Moved /timer before /time
+        # /timer <duration> [message]
+        parts = command_text.split(maxsplit=1) # Separate command from args
+        duration_str_timer = None
+        timer_message_str = None
+        if len(parts) > 1:
+            args_timer = parts[1].strip().split(maxsplit=1) # Split args into duration and message
+            if len(args_timer) >= 1:
+                duration_str_timer = args_timer[0]
+            if len(args_timer) > 1:
+                timer_message_str = args_timer[1]
+        print(timer_command_handler(duration_str_timer, timer_message_str))
     elif command_text.lower().startswith("/time"):
         parts = command_text.split(maxsplit=1)
         timezone_str = None # Default to None for local time
@@ -503,6 +516,50 @@ def process_command(command_text):
         if len(parts) > 1:
             user_chat_message = parts[1]
         print(chat_command_handler(user_chat_message))
+    elif command_text.lower().startswith("/timer"):
+        # /timer <duration> [message]
+        parts = command_text.split(maxsplit=1) # Separate command from args
+        duration_str_timer = None
+        timer_message_str = None
+        if len(parts) > 1:
+            args_timer = parts[1].strip().split(maxsplit=1) # Split args into duration and message
+            if len(args_timer) >= 1:
+                duration_str_timer = args_timer[0]
+            if len(args_timer) > 1:
+                timer_message_str = args_timer[1]
+        print(timer_command_handler(duration_str_timer, timer_message_str))
+    elif command_text.lower().startswith("/reminder"):
+        # /reminder <time_specifier> <message>
+        # e.g. /reminder in 10m Call mom
+        parts = command_text.split(maxsplit=1) # Separate command from args
+        time_spec_str_reminder = None
+        reminder_message_text = None
+        if len(parts) > 1:
+            args_reminder = parts[1].strip().split(maxsplit=1) # Split args into time_spec and message
+            # First part of args_reminder must be "in" for the simple parser
+            if len(args_reminder) >= 1 and args_reminder[0].lower() == "in":
+                if len(args_reminder) > 1: # We have "in" and potentially "10m Call mom"
+                    # Re-split the second part to get duration and message
+                    duration_and_msg_parts = args_reminder[1].split(maxsplit=1)
+                    time_spec_str_reminder = f"in {duration_and_msg_parts[0]}"
+                    if len(duration_and_msg_parts) > 1:
+                        reminder_message_text = duration_and_msg_parts[1]
+                    else: # Only "in <duration>" was provided, missing message
+                        # The handler will catch missing message
+                        pass
+                # else: only "/reminder in" was typed, handler will catch missing time_spec/message
+            else: # Does not start with "in", pass full args to handler for it to error
+                # Or, it's just "/reminder some message without 'in'"
+                # For simplicity, the handler expects "in ..." for time_spec
+                # So, if not "in", likely invalid time_spec or just reminder_text for a default time (not supported by current placeholder)
+                # Pass the first part as time_spec and rest as message
+                if len(args_reminder) >=1:
+                    time_spec_str_reminder = args_reminder[0] # Will likely fail in handler if not "in ..."
+                if len(args_reminder) > 1:
+                    reminder_message_text = args_reminder[1]
+
+
+        print(reminder_command_handler(time_spec_str_reminder, reminder_message_text))
     else:
         print(f"Unknown command: {command_text}")
 

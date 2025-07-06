@@ -52,6 +52,8 @@ COMMANDS_LIST = {
     "/summarize [len] <text>": "Summarizes text using AI. Len: short, medium (default), long.",
     "/codegen [lang] <desc>": "Generates code from a description (e.g., /codegen python fibonacci function).",
     "/chat [message]": "Engage in a stateless chat with the AI. Requires API key.",
+    "/timer <duration> [msg]": "Sets a blocking timer (e.g., /timer 30s My Message). Max 3h.",
+    "/reminder <when> <msg>": "Sets a placeholder reminder (e.g., /reminder in 10m Call Mom).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
