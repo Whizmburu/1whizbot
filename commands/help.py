@@ -57,6 +57,10 @@ COMMANDS_LIST = {
     "/ban <user> [reason]": "Bans a user from the group (placeholder).",
     "/kick <user> [reason]": "Kicks a user from the group (placeholder).",
     "/promote <user>": "Promotes a user to group admin (placeholder).",
+    "/demote <user>": "Demotes a user from group admin (placeholder).", # This was missing in my previous search block
+    "/mute <user> [duration]": "Mutes a user in the group (placeholder). E.g. /mute @user 1h",
+    "/warn <user> [reason]": "Warns a user in the group (placeholder).",
+    "/unban <user>": "Unbans a user from the group (placeholder).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }

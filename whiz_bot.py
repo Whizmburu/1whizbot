@@ -65,7 +65,10 @@ from commands.timing_cmds import start_blocking_timer as timer_command_handler, 
 from commands.group_admin_cmds import ban_user_placeholder as ban_command_handler, \
                                       kick_user_placeholder as kick_command_handler, \
                                       promote_user_placeholder as promote_command_handler, \
-                                      demote_user_placeholder as demote_command_handler # Added group_admin
+                                      demote_user_placeholder as demote_command_handler, \
+                                      mute_user_placeholder as mute_command_handler, \
+                                      warn_user_placeholder as warn_command_handler, \
+                                      unban_user_placeholder as unban_command_handler # Added group_admin
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -600,6 +603,36 @@ def process_command(command_text):
         if len(parts) > 1:
             user_to_demote = parts[1].strip() # Demote takes only one arg (user)
         print(demote_command_handler(user_to_demote))
+    elif command_text.lower().startswith("/mute"):
+        # /mute <user_id> [duration]
+        parts = command_text.split(maxsplit=1)
+        user_to_mute = None
+        duration_for_mute = None
+        if len(parts) > 1:
+            args_mute = parts[1].strip().split(maxsplit=1)
+            if len(args_mute) >= 1:
+                user_to_mute = args_mute[0]
+            if len(args_mute) > 1:
+                duration_for_mute = args_mute[1]
+        print(mute_command_handler(user_to_mute, duration_for_mute))
+    elif command_text.lower().startswith("/warn"):
+        # /warn <user_id> [reason]
+        parts = command_text.split(maxsplit=1)
+        user_to_warn = None
+        reason_for_warn = None
+        if len(parts) > 1:
+            args_warn = parts[1].strip().split(maxsplit=1)
+            if len(args_warn) >= 1:
+                user_to_warn = args_warn[0]
+            if len(args_warn) > 1:
+                reason_for_warn = args_warn[1]
+        print(warn_command_handler(user_to_warn, reason_for_warn))
+    elif command_text.lower().startswith("/unban"):
+        parts = command_text.split(maxsplit=1)
+        user_to_unban = None
+        if len(parts) > 1:
+            user_to_unban = parts[1].strip() # Unban takes only one arg (user)
+        print(unban_command_handler(user_to_unban))
     else:
         print(f"Unknown command: {command_text}")
 
