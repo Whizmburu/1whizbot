@@ -58,7 +58,8 @@ from commands.internet_cmds import fetch_wikipedia_summary as wiki_command_handl
 from commands.ai_cmds import get_ai_response as ask_command_handler, \
                                generate_ai_image_from_prompt as imagegen_command_handler, \
                                get_ai_summary as summarize_command_handler, \
-                               get_ai_code_generation as codegen_command_handler # Added AI command
+                               get_ai_code_generation as codegen_command_handler, \
+                               get_ai_chat_response as chat_command_handler # Added AI command
 
 
 # Store bot's actual start time for uptime calculation consistency
@@ -496,6 +497,12 @@ def process_command(command_text):
                 code_desc_codegen = args_str_codegen
 
         print(codegen_command_handler(code_desc_codegen, target_lang_codegen))
+    elif command_text.lower().startswith("/chat"):
+        parts = command_text.split(maxsplit=1)
+        user_chat_message = None
+        if len(parts) > 1:
+            user_chat_message = parts[1]
+        print(chat_command_handler(user_chat_message))
     else:
         print(f"Unknown command: {command_text}")
 

@@ -502,3 +502,116 @@ if __name__ == '__main__':
         print("  Skipping further OpenAI Code Generation tests as OPENAI_API_KEY is not set or invalid in .env.\n")
 
     print("-" * 20 + "\n")
+
+# --- AI Chat Command (Stateless) ---
+def get_ai_chat_response(user_message: str = None) -> str:
+    """
+    Gets a conversational response from OpenAI's chat completion API.
+    This is a stateless version, meaning it doesn't remember past interactions in the chat.
+    """
+    if not OPENAI_AVAILABLE:
+        return "🚫 Error: The 'openai' library is not installed. Cannot use AI chat features."
+
+    api_key = get_env_variable("OPENAI_API_KEY")
+    bot_name = get_env_variable("BOT_NAME", "WHIZ-MD")
+
+    if not api_key or not api_key.startswith("sk-"):
+        return f"🚫 Error: OpenAI API key is not configured or invalid for {bot_name}.\n" \
+               f"Please set a valid OPENAI_API_KEY (starting with 'sk-') in the .env file."
+
+    if not user_message or not user_message.strip():
+        return f"👋 Hello! I'm {bot_name}. What's on your mind? (Usage: /chat <your message>)"
+
+    system_prompt = (
+        f"You are {bot_name}, a friendly, engaging, and conversational AI assistant. "
+        "Your goal is to chat naturally with the user. Be inquisitive and responsive. "
+        "Keep your responses relatively concise for a chat format."
+    )
+
+    try:
+        client = OpenAI()
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message.strip()}
+            ],
+            max_tokens=200, # Keep chat responses a bit shorter than general /ask
+            temperature=0.75 # Slightly more creative/varied for chat
+        )
+
+        ai_reply = chat_completion.choices[0].message.content
+
+        if not ai_reply or not ai_reply.strip():
+            return "💬 Hmm, I'm not sure what to say to that! Try something else?"
+
+        # No special formatting, just return the AI's text for chat
+        return ai_reply.strip()
+
+    except AuthenticationError:
+        return "🚫 Error: OpenAI API Key is invalid or has insufficient permissions. Please check your key."
+    except RateLimitError:
+        return "🚫 Error: OpenAI API rate limit exceeded. Please try again later."
+    except APIError as e:
+        # print(f"OpenAI Chat APIError: {e}")
+        return f"🚫 Error: An issue occurred with the OpenAI API during chat. (Status: {e.status_code if hasattr(e, 'status_code') else 'N/A'}, Message: {e.message if hasattr(e, 'message') else str(e)})"
+    except Exception as e:
+        # print(f"Chat command error: {e}")
+        return f"🚫 Error: An unexpected error occurred while trying to chat. ({e})"
+
+
+if __name__ == '__main__':
+    print("--- Testing AI Commands ---\n")
+
+    original_openai_key = get_env_variable("OPENAI_API_KEY")
+
+    print("Testing AI Ask Command (/ask):")
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Ask 'What is 2+2?': (result snippet)\n{get_ai_response('What is 2+2?')[:100]}...\n")
+    else:
+        print("  Skipping /ask test as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("Testing AI Image Generation Command (/imagegen):")
+    if original_openai_key and original_openai_key.startswith("sk-"):
+         print(f"  Imagegen 'A red apple on a table' (result snippet):\n{generate_ai_image_from_prompt('A red apple on a table', size='256x256')[:150]}...\n")
+    else:
+        print("  Skipping /imagegen test as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("Testing AI Summarize Command (/summarize):")
+    sample_text_short_for_test = "The quick brown fox jumps over the lazy dog."
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Summary for short text (medium):\n{get_ai_summary(sample_text_short_for_test, length_option='medium')}\n")
+    else:
+        print("  Skipping /summarize test as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("Testing AI Code Generation Command (/codegen):")
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print(f"  Codegen 'python function to find factorial' (snippet):\n{get_ai_code_generation('python function to find factorial')[:150]}...\n")
+    else:
+        print("  Skipping /codegen test as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("Testing AI Chat Command (/chat):")
+    print("  --- Test Case 1: OpenAI API Key Missing/Invalid (simulated for chat) ---")
+    current_key_for_chat_test = os.environ.get("OPENAI_API_KEY")
+    os.environ["OPENAI_API_KEY"] = "INVALID_KEY_NO_SK_PREFIX_CHAT"
+    print(f"  Output (invalid key format): {get_ai_chat_response('Hello there!')}\n")
+    if current_key_for_chat_test is not None:
+         os.environ["OPENAI_API_KEY"] = current_key_for_chat_test
+    else:
+        if "OPENAI_API_KEY" in os.environ and os.environ["OPENAI_API_KEY"] == "INVALID_KEY_NO_SK_PREFIX_CHAT":
+            del os.environ["OPENAI_API_KEY"]
+
+    print("  --- Test Case 2: No Message ---")
+    print(f"  Output (no message): {get_ai_chat_response('')}\n")
+
+    if original_openai_key and original_openai_key.startswith("sk-"):
+        print("  --- Test Case 3: Simple Greeting (requires valid API key) ---")
+        print(f"  User: 'Hi, how are you today?'\n  AI: {get_ai_chat_response('Hi, how are you today?')}\n")
+
+        print("  --- Test Case 4: A simple question ---")
+        print(f"  User: 'What's your favorite color?'\n  AI: {get_ai_chat_response('What is your favorite color?')}\n")
+    else:
+        print("  Skipping further OpenAI Chat tests as OPENAI_API_KEY is not set or invalid in .env.\n")
+
+    print("-" * 20 + "\n")

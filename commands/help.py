@@ -51,6 +51,7 @@ COMMANDS_LIST = {
     "/imagegen <prompt>": "Generates an image from text using AI (OpenAI DALL·E). Requires API key.",
     "/summarize [len] <text>": "Summarizes text using AI. Len: short, medium (default), long.",
     "/codegen [lang] <desc>": "Generates code from a description (e.g., /codegen python fibonacci function).",
+    "/chat [message]": "Engage in a stateless chat with the AI. Requires API key.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
