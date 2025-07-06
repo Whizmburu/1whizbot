@@ -23,7 +23,7 @@ from commands.report import get_report_message as report_command_handler
 from commands.invite import get_invite_message as invite_command_handler
 from commands.calc import evaluate_expression as calc_command_handler
 from commands.qr import generate_qr_image as qr_command_handler
-# from commands.translate import translate_text_command as translate_command_handler # Temporarily commented out due to httpx conflict
+from commands.translate import translate_text_command as translate_command_handler # Re-enabled
 from commands.shorturl import generate_short_url as shorturl_command_handler
 from commands.weather import fetch_weather_data as weather_command_handler
 from commands.time_cmd import get_current_time_for_timezone as time_command_handler
@@ -139,12 +139,12 @@ def process_command(command_text):
         if len(parts) > 1:
             text_to_encode = parts[1]
         print(qr_command_handler(text_to_encode))
-    # elif command_text.lower().startswith("/translate"): # Temporarily commented out
-    #     parts = command_text.split(maxsplit=1)
-    #     args_str = ""
-    #     if len(parts) > 1:
-    #         args_str = parts[1]
-    #     print(translate_command_handler(args_str))
+    elif command_text.lower().startswith("/translate"): # Re-enabled
+        parts = command_text.split(maxsplit=1)
+        args_str = ""
+        if len(parts) > 1:
+            args_str = parts[1]
+        print(translate_command_handler(args_str))
     elif command_text.lower().startswith("/shorturl"):
         parts = command_text.split(maxsplit=1)
         url_to_shorten = ""
