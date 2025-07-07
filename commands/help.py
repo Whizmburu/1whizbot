@@ -64,6 +64,8 @@ COMMANDS_LIST = {
     "/groupinfo": "Displays information about the current group (placeholder).",
     "/antilink [on|off]": "Toggles anti-link feature for the group (placeholder).",
     "/lockgroup [on|off]": "Toggles group lock (admin-only messages) (placeholder).",
+    "/sticker <image_path/url>": "Converts an image to a sticker (placeholder).",
+    "/toimg <sticker_path/url>": "Converts a sticker back to an image (placeholder).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
