@@ -73,7 +73,10 @@ from commands.group_admin_cmds import ban_user_placeholder as ban_command_handle
                                       toggle_antilink_placeholder as antilink_command_handler, \
                                       toggle_lockgroup_placeholder as lockgroup_command_handler
 from commands.media_cmds import convert_to_sticker_placeholder as sticker_command_handler, \
-                                convert_sticker_to_image_placeholder as toimg_command_handler # Added media_cmds
+                                convert_sticker_to_image_placeholder as toimg_command_handler, \
+                                convert_video_to_mp3_placeholder as tomp3_command_handler, \
+                                convert_gif_to_sticker_placeholder as gifsticker_command_handler, \
+                                remove_image_background_placeholder as removebg_command_handler # Added media_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -664,6 +667,24 @@ def process_command(command_text):
         if len(parts) > 1:
             sticker_path_toimg = parts[1].strip() # Path or URL to sticker
         print(toimg_command_handler(sticker_path_toimg))
+    elif command_text.lower().startswith("/tomp3"):
+        parts = command_text.split(maxsplit=1)
+        video_path_tomp3 = None
+        if len(parts) > 1:
+            video_path_tomp3 = parts[1].strip() # Path or URL to video
+        print(tomp3_command_handler(video_path_tomp3))
+    elif command_text.lower().startswith("/gifsticker"):
+        parts = command_text.split(maxsplit=1)
+        gif_path_sticker = None
+        if len(parts) > 1:
+            gif_path_sticker = parts[1].strip() # Path or URL to GIF
+        print(gifsticker_command_handler(gif_path_sticker))
+    elif command_text.lower().startswith("/removebg"):
+        parts = command_text.split(maxsplit=1)
+        image_path_removebg = None
+        if len(parts) > 1:
+            image_path_removebg = parts[1].strip() # Path or URL to image
+        print(removebg_command_handler(image_path_removebg))
     else:
         print(f"Unknown command: {command_text}")
 

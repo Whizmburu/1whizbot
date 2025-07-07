@@ -66,6 +66,9 @@ COMMANDS_LIST = {
     "/lockgroup [on|off]": "Toggles group lock (admin-only messages) (placeholder).",
     "/sticker <image_path/url>": "Converts an image to a sticker (placeholder).",
     "/toimg <sticker_path/url>": "Converts a sticker back to an image (placeholder).",
+    "/tomp3 <video_path/url>": "Converts a video to MP3 audio (placeholder).",
+    "/gifsticker <gif_path/url>": "Converts a GIF to an animated sticker (placeholder).",
+    "/removebg <image_path/url>": "Removes background from an image (placeholder).",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
