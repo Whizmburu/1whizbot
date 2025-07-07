@@ -186,5 +186,87 @@ if __name__ == '__main__':
     print(f"  With URL: {remove_image_background_placeholder('http://example.com/photo.png')}")
     print("-" * 20 + "\n")
 
+# --- Resize Image Command (Placeholder) ---
+def resize_image_placeholder(input_image_path: str = None, dimensions_str: str = None) -> str:
+    """
+    Placeholder for resizing an image.
+    """
+    if not input_image_path or not input_image_path.strip():
+        return "↔️ Usage: /resize <path_to_image> [WxH | percentage% | widthx_ | _xheight]"
+
+    dims_display = dimensions_str.strip() if dimensions_str and dimensions_str.strip() else "default settings"
+
+    # In a real implementation:
+    # 1. Download/load image.
+    # 2. Parse dimensions_str:
+    #    - "500x300" -> width=500, height=300
+    #    - "50%" -> scale by 0.5
+    #    - "1024x_" -> width=1024, auto height maintaining aspect ratio
+    #    - "_x768" -> height=768, auto width
+    # 3. Use Pillow: img.resize((new_width, new_height), Image.Resampling.LANCZOS) or img.thumbnail()
+    # 4. Save and send.
+
+    return f"↔️ Image at '{input_image_path.strip()}' would be resized to '{dims_display}'.\n" \
+           f"(Placeholder - no actual image processing implemented yet)."
+
+
+if __name__ == '__main__':
+    print("--- Testing Media Commands (Placeholders) ---\n")
+
+    # ... (previous media tests) ...
+    print("Testing Remove Background Placeholder:")
+    print(f"  With path: {remove_image_background_placeholder('path/to/my/photo.jpg')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Resize Image Placeholder:")
+    print(f"  No path: {resize_image_placeholder()}")
+    print(f"  Path only: {resize_image_placeholder('path/to/image.png')}")
+    print(f"  Path and dimensions: {resize_image_placeholder('path/to/image.png', '500x300')}")
+    print(f"  Path and percentage: {resize_image_placeholder('path/to/image.png', '50%')}")
+    print("-" * 20 + "\n")
+
+# --- Apply Filter Command (Placeholder) ---
+def apply_filter_placeholder(input_image_path: str = None, filter_name: str = None) -> str:
+    """
+    Placeholder for applying a filter to an image.
+    """
+    if not input_image_path or not input_image_path.strip():
+        return "🎨 Usage: /filter <path_to_image> [filter_name (e.g., grayscale, sepia, blur)]"
+
+    filter_display = filter_name.strip() if filter_name and filter_name.strip() else "a default/random filter"
+
+    # In a real implementation:
+    # 1. Download/load image.
+    # 2. Use Pillow's ImageFilter module or specific operations:
+    #    from PIL import Image, ImageFilter
+    #    img = Image.open(path)
+    #    if filter_name == "grayscale": new_img = img.convert("L")
+    #    elif filter_name == "blur": new_img = img.filter(ImageFilter.BLUR)
+    #    elif filter_name == "sepia": # Sepia is more complex, often custom matrix or steps
+    #        # simplified sepia:
+    #        # new_img = img.convert("L")
+    #        # new_img = ImageOps.colorize(new_img, "#704214", "#C0A080") # Example colors
+    #    # ... other filters
+    # 3. Save and send.
+
+    return f"🎨 Filter '{filter_display}' would be applied to image at '{input_image_path.strip()}'.\n" \
+           f"(Placeholder - no actual image processing implemented yet)."
+
+
+if __name__ == '__main__':
+    print("--- Testing Media Commands (Placeholders) ---\n")
+
+    # ... (previous media tests) ...
+    print("Testing Resize Image Placeholder:")
+    print(f"  Path and dimensions: {resize_image_placeholder('path/to/image.png', '500x300')}")
+    print("-" * 20 + "\n")
+
+    print("Testing Apply Filter Placeholder:")
+    print(f"  No path: {apply_filter_placeholder()}")
+    print(f"  Path only (default filter): {apply_filter_placeholder('path/to/image.png')}")
+    print(f"  Path and filter 'grayscale': {apply_filter_placeholder('path/to/image.png', 'grayscale')}")
+    print(f"  Path and filter 'sepia': {apply_filter_placeholder('path/to/image.png', 'sepia')}")
+    print("-" * 20 + "\n")
+
     # Tests for other individual commands will be added as they are implemented below.
     pass

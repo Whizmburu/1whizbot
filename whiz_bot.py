@@ -76,7 +76,9 @@ from commands.media_cmds import convert_to_sticker_placeholder as sticker_comman
                                 convert_sticker_to_image_placeholder as toimg_command_handler, \
                                 convert_video_to_mp3_placeholder as tomp3_command_handler, \
                                 convert_gif_to_sticker_placeholder as gifsticker_command_handler, \
-                                remove_image_background_placeholder as removebg_command_handler # Added media_cmds
+                                remove_image_background_placeholder as removebg_command_handler, \
+                                resize_image_placeholder as resize_command_handler, \
+                                apply_filter_placeholder as filter_command_handler # Added media_cmds
 
 # Store bot's actual start time for uptime calculation consistency
 # This shadows the BOT_START_TIME in utils.uptime but ensures it's captured at the true start of whiz_bot.py
@@ -685,6 +687,30 @@ def process_command(command_text):
         if len(parts) > 1:
             image_path_removebg = parts[1].strip() # Path or URL to image
         print(removebg_command_handler(image_path_removebg))
+    elif command_text.lower().startswith("/resize"):
+        # /resize <image_path> [dimensions_str]
+        parts = command_text.split(maxsplit=1)
+        image_path_resize = None
+        dimensions_resize = None
+        if len(parts) > 1:
+            args_resize = parts[1].strip().split(maxsplit=1)
+            if len(args_resize) >= 1:
+                image_path_resize = args_resize[0]
+            if len(args_resize) > 1:
+                dimensions_resize = args_resize[1]
+        print(resize_command_handler(image_path_resize, dimensions_resize))
+    elif command_text.lower().startswith("/filter"):
+        # /filter <image_path> [filter_name]
+        parts = command_text.split(maxsplit=1)
+        image_path_filter = None
+        filter_name_str = None
+        if len(parts) > 1:
+            args_filter = parts[1].strip().split(maxsplit=1)
+            if len(args_filter) >= 1:
+                image_path_filter = args_filter[0]
+            if len(args_filter) > 1:
+                filter_name_str = args_filter[1]
+        print(filter_command_handler(image_path_filter, filter_name_str))
     else:
         print(f"Unknown command: {command_text}")
 

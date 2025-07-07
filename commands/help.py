@@ -69,6 +69,8 @@ COMMANDS_LIST = {
     "/tomp3 <video_path/url>": "Converts a video to MP3 audio (placeholder).",
     "/gifsticker <gif_path/url>": "Converts a GIF to an animated sticker (placeholder).",
     "/removebg <image_path/url>": "Removes background from an image (placeholder).",
+    "/resize <path> [dims]": "Resizes an image (placeholder). Dims: WxH or % (e.g., 512x512, 50%).",
+    "/filter <path> [name]": "Applies a filter to an image (placeholder). E.g. /filter img.jpg grayscale.",
     "/help": "Shows this help message with all available commands."
     # Add new commands here as they are implemented
 }
